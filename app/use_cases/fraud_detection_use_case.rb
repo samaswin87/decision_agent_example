@@ -195,16 +195,33 @@ class FraudDetectionUseCase
 
   # Batch evaluation for multiple transactions
   def self.evaluate_batch(transactions, parallel: true)
-    service = DecisionService.instance
     setup_rules
 
-    if parallel
+    start_time = Time.current
+
+    results = if parallel
       transactions.map do |txn|
         Thread.new { evaluate_transaction(txn) }
       end.map(&:value)
     else
       transactions.map { |txn| evaluate_transaction(txn) }
     end
+
+    end_time = Time.current
+    duration = end_time - start_time
+
+    {
+      results: results,
+      performance: {
+        total_evaluations: transactions.size,
+        duration_seconds: duration.round(3),
+        average_per_evaluation_ms: ((duration / transactions.size) * 1000).round(2),
+        evaluations_per_second: (transactions.size / duration).round(2),
+        parallel: parallel,
+        started_at: start_time,
+        completed_at: end_time
+      }
+    }
   end
 
   def self.setup_rules

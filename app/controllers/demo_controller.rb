@@ -1131,4 +1131,150 @@ class DemoController < ApplicationController
       { id: 'monitoring', name: 'Monitoring & Observability', description: 'Comprehensive monitoring and performance tracking' }
     ]
   end
+
+  # NEW: A/B Testing Actions
+  def ab_testing
+    # Render the A/B testing UI page
+  end
+
+  def create_ab_test
+    # In a real implementation, this would create a test using DecisionAgent::ABTesting::ABTestManager
+    # For now, return mock response
+    render json: {
+      success: true,
+      test_id: "test_#{SecureRandom.hex(4)}",
+      message: "A/B test created successfully"
+    }
+  end
+
+  def run_ab_test
+    # Simulate running an A/B test
+    test_id = params[:test_id]
+    user_count = params[:user_count].to_i
+    scenario = params[:scenario]
+
+    # Mock results
+    render json: {
+      test_id: test_id,
+      processed: user_count,
+      champion_stats: {
+        assignments: (user_count * 0.9).to_i,
+        approvals: (user_count * 0.9 * 0.45).to_i
+      },
+      challenger_stats: {
+        assignments: (user_count * 0.1).to_i,
+        approvals: (user_count * 0.1 * 0.68).to_i
+      }
+    }
+  end
+
+  def ab_test_results
+    test_id = params[:test_id]
+
+    # Mock test results
+    render json: {
+      test_id: test_id,
+      champion: { approvals: 405, reviews: 495, avg_confidence: 0.82 },
+      challenger: { approvals: 68, reviews: 32, avg_confidence: 0.79 }
+    }
+  end
+
+  def complete_ab_test
+    test_id = params[:test_id]
+
+    render json: {
+      success: true,
+      message: "Test #{test_id} marked as completed"
+    }
+  end
+
+  # NEW: Persistent Monitoring Actions
+  def persistent_monitoring
+    # Render the persistent monitoring UI page
+  end
+
+  def record_persistent_decisions
+    count = params[:count].to_i
+    use_case = params[:use_case]
+
+    # Simulate recording decisions to database
+    # In real implementation, use DecisionAgent::Monitoring::MetricsCollector with database storage
+
+    render json: {
+      success: true,
+      recorded: count,
+      use_case: use_case,
+      message: "#{count} decisions recorded to database"
+    }
+  end
+
+  def database_stats
+    # Mock database statistics
+    render json: {
+      total_decisions: rand(10000..15000),
+      total_evaluations: rand(20000..30000),
+      total_performance: rand(15000..22000),
+      total_errors: rand(10..60),
+      success_rate: (rand(90..99) / 100.0).round(3),
+      avg_confidence: (rand(75..85) / 100.0).round(3),
+      avg_duration: (rand(15..35)).round(2),
+      p95_latency: (rand(80..130)).round(2)
+    }
+  end
+
+  def historical_data
+    time_range = params[:time_range].to_i
+
+    # Mock historical data
+    decisions = {
+      approved: rand(500..1300),
+      review: rand(200..500),
+      denied: rand(50..150)
+    }
+
+    render json: {
+      time_range: time_range,
+      decisions: decisions,
+      total: decisions.values.sum
+    }
+  end
+
+  def cleanup_metrics
+    days = params[:days].to_i
+
+    # Mock cleanup
+    removed_count = rand(500..1500)
+
+    render json: {
+      success: true,
+      removed: removed_count,
+      days: days,
+      message: "Removed #{removed_count} metrics older than #{days} days"
+    }
+  end
+
+  def custom_query
+    query_type = params[:query_type]
+
+    result = case query_type
+    when 'high_confidence'
+      { count: rand(5000..7000), description: 'Decisions with confidence ≥ 0.8' }
+    when 'recent_success'
+      { count: rand(800..1300), success_rate: (rand(95..99)).round(1) }
+    when 'avg_transaction_duration'
+      { avg_duration: (rand(120..180)).round(2), total_transactions: rand(10000..15000) }
+    when 'error_analysis'
+      {
+        errors: {
+          'ArgumentError' => rand(5..15),
+          'ValidationError' => rand(3..11),
+          'TimeoutError' => rand(2..7)
+        }
+      }
+    else
+      { error: 'Unknown query type' }
+    end
+
+    render json: result
+  end
 end

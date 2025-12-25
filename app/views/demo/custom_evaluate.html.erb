@@ -5,17 +5,177 @@
   <%= form_with url: demo_custom_evaluate_path, method: :post, local: true do |f| %>
     <div class="form-group">
       <%= label_tag :rule_id, "Select Rule" %>
-      <%= select_tag :rule_id, options_from_collection_for_select(@rules, :rule_id, :rule_id, params[:rule_id]), include_blank: "Choose a rule...", class: "form-control" %>
+      <%= select_tag :rule_id, options_from_collection_for_select(@rules, :rule_id, :rule_id, params[:rule_id]), include_blank: "Choose a rule...", class: "form-control", id: "rule_selector" %>
     </div>
 
     <div class="form-group">
       <%= label_tag :context, "Context (JSON)" %>
-      <%= text_area_tag :context, params[:context] || '{"credit_score": 720, "annual_income": 65000, "debt_to_income_ratio": 0.35}', rows: 8, class: "form-control", style: "font-family: monospace;" %>
+      <%= text_area_tag :context, params[:context] || '{"credit_score": 720, "annual_income": 65000, "debt_to_income_ratio": 0.35}', rows: 8, class: "form-control", style: "font-family: monospace;", id: "context_input" %>
       <small style="color: #666;">Enter valid JSON object with the facts for this rule to evaluate.</small>
     </div>
 
     <button type="submit">Evaluate</button>
   <% end %>
+
+  <script>
+    // Context examples for different rules
+    const contextExamples = {
+      // Loan Approval Rules
+      'simple_loan_approval': {
+        "credit_score": 720,
+        "annual_income": 65000,
+        "debt_to_income_ratio": 0.35
+      },
+
+      // Discount Rules
+      'discount_engine_v1': {
+        "customer_tier": "gold",
+        "cart_total": 150,
+        "total_items": 5,
+        "is_first_purchase": false
+      },
+      'discount_cart_threshold': {
+        "cart_total": 500
+      },
+      'discount_loyalty': {
+        "customer_tier": "gold",
+        "cart_total": 150
+      },
+      'discount_bulk': {
+        "total_items": 15,
+        "cart_total": 250
+      },
+      'discount_bulk_purchase': {
+        "total_items": 15,
+        "cart_total": 250
+      },
+      'discount_first_time': {
+        "is_first_purchase": true,
+        "cart_total": 75
+      },
+      'discount_seasonal': {
+        "promo_code": "WINTER2025",
+        "cart_total": 100
+      },
+
+      // Insurance Rules
+      'auto_insurance_preferred': {
+        "driver_age": 35,
+        "years_licensed": 10,
+        "accidents_3_years": 0,
+        "violations_3_years": 0,
+        "credit_score": 720,
+        "annual_mileage": 10000
+      },
+      'auto_insurance_standard': {
+        "driver_age": 25,
+        "years_licensed": 5,
+        "accidents_3_years": 1,
+        "violations_3_years": 1,
+        "credit_score": 650
+      },
+      'auto_insurance_high_risk': {
+        "driver_age": 22,
+        "years_licensed": 3,
+        "accidents_3_years": 2,
+        "violations_3_years": 3,
+        "credit_score": 580,
+        "dui_history": false
+      },
+      'auto_insurance_rejection': {
+        "driver_age": 17,
+        "years_licensed": 0,
+        "license_suspended": false,
+        "sr22_required": false
+      },
+
+      // Fraud Detection Rules
+      'fraud_detection_v1': {
+        "transaction_amount": 500,
+        "device_fingerprint_match": true,
+        "location_match": true,
+        "ip_reputation_score": 75,
+        "transactions_last_hour": 2
+      },
+      'fraud_high_risk': {
+        "transaction_amount": 5000,
+        "device_fingerprint_match": false,
+        "location_match": false,
+        "ip_reputation_score": 20,
+        "transactions_last_hour": 8
+      },
+      'fraud_medium_risk': {
+        "transaction_amount": 800,
+        "device_fingerprint_match": true,
+        "location_match": false,
+        "ip_reputation_score": 60,
+        "transactions_last_hour": 4
+      },
+      'fraud_detection_medium': {
+        "transaction_amount": 800,
+        "device_fingerprint_match": true,
+        "location_match": false,
+        "ip_reputation_score": 60,
+        "transactions_last_hour": 4
+      },
+      'fraud_low_risk': {
+        "transaction_amount": 200,
+        "device_fingerprint_match": true,
+        "location_match": true,
+        "ip_reputation_score": 80,
+        "transactions_last_hour": 2
+      },
+      'fraud_detection_low': {
+        "transaction_amount": 200,
+        "device_fingerprint_match": true,
+        "location_match": true,
+        "ip_reputation_score": 80,
+        "transactions_last_hour": 2
+      },
+      'fraud_safe': {
+        "transaction_amount": 50,
+        "device_fingerprint_match": true,
+        "location_match": true,
+        "ip_reputation_score": 95,
+        "transactions_last_hour": 1
+      },
+      'fraud_detection_safe': {
+        "transaction_amount": 50,
+        "device_fingerprint_match": true,
+        "location_match": true,
+        "ip_reputation_score": 95,
+        "transactions_last_hour": 1
+      },
+
+      // Monitoring/Credit Rules
+      'monitored_credit_decision': {
+        "credit_score": 700,
+        "requested_amount": 20000,
+        "debt_to_income": 0.35,
+        "recent_bankruptcies": 0,
+        "employment_years": 5
+      },
+
+      // UI Dashboard Rules
+      'ui_customer_onboarding': {
+        "credit_score": 720,
+        "annual_income": 65000,
+        "employment_years": 5,
+        "existing_customer": false,
+        "fraud_risk_score": 10
+      }
+    };
+
+    // Update context when rule changes
+    document.getElementById('rule_selector').addEventListener('change', function() {
+      const selectedRule = this.value;
+      const contextInput = document.getElementById('context_input');
+
+      if (selectedRule && contextExamples[selectedRule]) {
+        contextInput.value = JSON.stringify(contextExamples[selectedRule], null, 2);
+      }
+    });
+  </script>
 
   <% if @result %>
     <div class="result <%= @result[:error] ? 'error' : 'success' %>">

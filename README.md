@@ -1,6 +1,6 @@
 # DecisionAgent Example Application
 
-A comprehensive Rails application demonstrating the `decision_agent` gem with **thread-safety**, **versioning**, **real-world use cases**, **performance testing**, and an interactive **web UI**.
+A comprehensive Rails application demonstrating the `decision_agent` gem (v0.1.4) with **thread-safety**, **versioning**, **A/B testing**, **persistent monitoring**, **real-world use cases**, **performance testing**, and an interactive **web UI**.
 
 ## 🚀 Features
 
@@ -10,6 +10,12 @@ A comprehensive Rails application demonstrating the `decision_agent` gem with **
 - **JSON-based Rules** - Using JsonRuleEvaluator with if/then syntax
 - **Batch Processing** - Sequential and parallel evaluation modes
 - **Built-in Caching** - Performance optimization with cache invalidation
+
+### 🆕 NEW in v0.1.4
+- **A/B Testing** - Compare rule versions with statistical significance analysis
+- **Persistent Monitoring** - Database-backed metrics storage with historical analysis
+- **Web UI Integration** - Mount DecisionAgent visual rule builder in Rails
+- **Advanced Monitoring** - Real-time dashboards, Prometheus export, Grafana integration
 
 ### Web UI & Visualization
 - **Interactive Demos** - Test all use cases through web interface
@@ -70,16 +76,18 @@ Access all DecisionAgent features in one place! Visit `/demo/test_center` for:
 | Page | URL | Description |
 |------|-----|-------------|
 | **Home** | `/` | Overview with navigation to all features |
-| **🧪 Test Center** | `/demo/test_center` | **NEW** Comprehensive testing suite for all features |
+| **🧪 Test Center** | `/demo/test_center` | Comprehensive testing suite for all features |
+| **🧪 A/B Testing** | `/demo/ab_testing` | **NEW** Compare rule versions with statistical analysis |
+| **💾 Persistent Monitoring** | `/demo/persistent_monitoring` | **NEW** Database-backed metrics and historical data |
 | **Performance Dashboard** | `/demo/performance_dashboard` | Run performance tests with metrics |
 | **Threading Visualization** | `/demo/threading_visualization` | Real-time thread monitoring |
 | **All Use Cases** | `/demo/all_use_cases` | Explore all 9 use case examples |
-| **Test All Use Cases** | `/demo/test_all_use_cases` | **NEW** Automated testing of all use cases |
-| **Data Generator** | `/demo/generate_test_data` | **NEW** Generate test data for any use case |
-| **Batch Testing** | `/demo/batch_testing` | **NEW** Batch testing with performance metrics |
-| **Monitoring Examples** | `/demo/monitoring_examples` | **NEW** Test all monitoring architectures |
-| **Rule Versioning** | `/demo/rule_versioning` | **NEW** Create and manage rule versions |
-| **Scoring Strategies** | `/demo/scoring_strategies` | **NEW** Test different scoring strategies |
+| **Test All Use Cases** | `/demo/test_all_use_cases` | Automated testing of all use cases |
+| **Data Generator** | `/demo/generate_test_data` | Generate test data for any use case |
+| **Batch Testing** | `/demo/batch_testing` | Batch testing with performance metrics |
+| **Monitoring Examples** | `/demo/monitoring_examples` | Test all monitoring architectures |
+| **Rule Versioning** | `/demo/rule_versioning` | Create and manage rule versions |
+| **Scoring Strategies** | `/demo/scoring_strategies` | Test different scoring strategies |
 | **Loan Approval** | `/demo/loan_approval` | Interactive loan evaluation form |
 | **Discount Engine** | `/demo/discount_engine` | Calculate order discounts |
 | **Fraud Detection** | `/demo/fraud_detection` | Transaction risk assessment |
@@ -150,6 +158,104 @@ Latency Statistics (ms):
    P95: 4.23ms
    P99: 8.91ms
 ```
+
+## 🆕 New Features Guide
+
+### A/B Testing
+
+Test different rule versions and analyze which performs better using statistical significance:
+
+```ruby
+# Visit /demo/ab_testing in the web UI
+
+# Features:
+# - Create A/B tests with champion vs challenger versions
+# - Configure traffic split (e.g., 90/10 or 50/50)
+# - Run tests with automatic user assignment
+# - View statistical analysis with confidence levels
+# - Compare approval rates, confidence scores, decision distribution
+# - Get recommendations based on test results
+```
+
+**Use Cases:**
+- Test new fraud detection thresholds before full rollout
+- Compare aggressive vs conservative loan approval rules
+- Validate pricing strategy changes with real data
+- Optimize discount engine rules for better conversion
+
+### Persistent Monitoring
+
+Store decision metrics in the database for long-term analysis:
+
+```ruby
+# Visit /demo/persistent_monitoring in the web UI
+
+# Features:
+# - Record decisions to database with full persistence
+# - Query historical data across different time ranges
+# - View database statistics (decisions, evaluations, performance)
+# - Run custom queries (high confidence, recent success, errors)
+# - Cleanup old metrics with configurable retention policies
+# - Analyze decision distribution and patterns
+```
+
+**Advantages over Memory Storage:**
+- ✅ Survives application restarts
+- ✅ Unlimited retention period
+- ✅ Complex queries with ActiveRecord
+- ✅ Historical trend analysis
+- ✅ Production-ready for high-volume environments
+
+### Web UI Integration
+
+Mount the DecisionAgent visual rule builder directly in your Rails app:
+
+```ruby
+# config/routes.rb
+require 'decision_agent/web/server'
+
+Rails.application.routes.draw do
+  # Mount DecisionAgent Web UI
+  mount DecisionAgent::Web::Server, at: '/decision_agent'
+end
+
+# With authentication:
+authenticate :user, ->(user) { user.admin? } do
+  mount DecisionAgent::Web::Server, at: '/decision_agent'
+end
+```
+
+Then visit `http://localhost:3000/decision_agent` to access the visual rule builder.
+
+### Advanced Monitoring & Analytics
+
+Real-time monitoring with Prometheus and Grafana integration:
+
+```ruby
+# Initialize metrics collection with database storage
+collector = DecisionAgent::Monitoring::MetricsCollector.new(storage: :auto)
+
+# Start real-time dashboard
+DecisionAgent::Monitoring::DashboardServer.start!(
+  port: 4568,
+  metrics_collector: collector
+)
+
+# Record decisions automatically
+monitored_agent = DecisionAgent::Monitoring::MonitoredAgent.new(
+  agent,
+  metrics_collector: collector
+)
+
+result = monitored_agent.evaluate(context)
+```
+
+**Features:**
+- Real-time dashboard with WebSocket updates
+- Prometheus metrics export at `/metrics`
+- Intelligent alerting with anomaly detection
+- Pre-built Grafana dashboards
+- Custom KPI tracking
 
 ## 📊 Usage Examples
 

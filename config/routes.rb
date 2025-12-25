@@ -98,4 +98,19 @@ Rails.application.routes.draw do
   post "demo/reset_database", to: "demo#reset_database"
   get "demo/run_all_tests", to: "demo#run_all_tests"
   get "demo/export_results", to: "demo#export_results"
+
+  # NEW: A/B Testing
+  get "demo/ab_testing", to: "demo#ab_testing"
+  post "demo/create_ab_test", to: "demo#create_ab_test"
+  post "demo/run_ab_test", to: "demo#run_ab_test"
+  get "demo/ab_test_results/:test_id", to: "demo#ab_test_results"
+  post "demo/complete_ab_test/:test_id", to: "demo#complete_ab_test"
+
+  # NEW: Persistent Monitoring
+  get "demo/persistent_monitoring", to: "demo#persistent_monitoring"
+  post "demo/record_persistent_decisions", to: "demo#record_persistent_decisions"
+  get "demo/database_stats", to: "demo#database_stats"
+  get "demo/historical_data/:time_range", to: "demo#historical_data"
+  post "demo/cleanup_metrics", to: "demo#cleanup_metrics"
+  get "demo/custom_query/:query_type", to: "demo#custom_query"
 end

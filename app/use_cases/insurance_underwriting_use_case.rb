@@ -197,30 +197,33 @@ class InsuranceUnderwritingUseCase
     end
 
     def evaluate_batch(applications, parallel: false)
-      contexts = applications.map do |app|
-        {
-          name: app[:name],
-          email: app[:email],
-          driver_age: app[:driver_age],
-          years_licensed: app[:years_licensed],
-          accidents_3_years: app[:accidents_3_years],
-          violations_3_years: app[:violations_3_years],
-          credit_score: app[:credit_score],
-          annual_mileage: app[:annual_mileage],
-          dui_history: app[:dui_history],
-          license_suspended: app[:license_suspended],
-          sr22_required: app[:sr22_required]
-        }
+      setup_rules
+
+      start_time = Time.current
+
+      results = if parallel
+        applications.map do |app|
+          Thread.new { evaluate(app) }
+        end.map(&:value)
+      else
+        applications.map { |app| evaluate(app) }
       end
 
-      rule_ids = [
-        'auto_insurance_rejection',
-        'auto_insurance_preferred',
-        'auto_insurance_standard',
-        'auto_insurance_high_risk'
-      ]
+      end_time = Time.current
+      duration = end_time - start_time
 
-      DecisionService.instance.evaluate_batch(rule_ids, contexts, parallel: parallel)
+      {
+        results: results,
+        performance: {
+          total_evaluations: applications.size,
+          duration_seconds: duration.round(3),
+          average_per_evaluation_ms: ((duration / applications.size) * 1000).round(2),
+          evaluations_per_second: (applications.size / duration).round(2),
+          parallel: parallel,
+          started_at: start_time,
+          completed_at: end_time
+        }
+      }
     end
   end
 end

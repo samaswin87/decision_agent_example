@@ -267,30 +267,33 @@ class DynamicPricingUseCase
     end
 
     def evaluate_batch(pricing_scenarios, parallel: false)
-      contexts = pricing_scenarios.map do |scenario|
-        {
-          product_id: scenario[:product_id],
-          base_price: scenario[:base_price],
-          demand_level: scenario[:demand_level],
-          inventory_remaining_percentage: scenario[:inventory_remaining_percentage],
-          inventory_count: scenario[:inventory_count],
-          time_to_event_hours: scenario[:time_to_event_hours],
-          competitor_avg_price: scenario[:competitor_avg_price],
-          competitor_availability: scenario[:competitor_availability],
-          customer_segment: scenario[:customer_segment],
-          days_listed: scenario[:days_listed]
-        }
+      setup_rules
+
+      start_time = Time.current
+
+      results = if parallel
+        pricing_scenarios.map do |scenario|
+          Thread.new { evaluate(scenario) }
+        end.map(&:value)
+      else
+        pricing_scenarios.map { |scenario| evaluate(scenario) }
       end
 
-      rule_ids = [
-        'pricing_surge',
-        'pricing_premium',
-        'pricing_standard',
-        'pricing_promotional',
-        'pricing_clearance'
-      ]
+      end_time = Time.current
+      duration = end_time - start_time
 
-      DecisionService.instance.evaluate_batch(rule_ids, contexts, parallel: parallel)
+      {
+        results: results,
+        performance: {
+          total_evaluations: pricing_scenarios.size,
+          duration_seconds: duration.round(3),
+          average_per_evaluation_ms: ((duration / pricing_scenarios.size) * 1000).round(2),
+          evaluations_per_second: (pricing_scenarios.size / duration).round(2),
+          parallel: parallel,
+          started_at: start_time,
+          completed_at: end_time
+        }
+      }
     end
   end
 end

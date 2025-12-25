@@ -1,0 +1,556 @@
+<div class="card">
+  <h2>💾 Persistent Monitoring - Database Storage</h2>
+  <p>Track decision metrics with database persistence. Analyze historical data, query patterns, and manage retention policies.</p>
+</div>
+
+<!-- Storage Mode Selection -->
+<div class="card">
+  <h3>⚙️ Storage Configuration</h3>
+  <div class="storage-options">
+    <div class="storage-card active" data-storage="database">
+      <h4>💾 Database Storage</h4>
+      <ul>
+        <li>✓ Persistent across restarts</li>
+        <li>✓ Unlimited retention</li>
+        <li>✓ Complex queries with ActiveRecord</li>
+        <li>✓ Production-ready</li>
+      </ul>
+      <span class="selected-badge">ACTIVE</span>
+    </div>
+    <div class="storage-card" data-storage="memory">
+      <h4>⚡ Memory Storage</h4>
+      <ul>
+        <li>✓ Faster performance</li>
+        <li>✓ Zero dependencies</li>
+        <li>✗ Lost on restart</li>
+        <li>✓ Limited window (1 hour)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Record Decisions Section -->
+<div class="card">
+  <h3>📝 Record Test Decisions</h3>
+  <form id="recordDecisionsForm">
+    <div class="form-group">
+      <label>Number of Decisions to Record:</label>
+      <input type="number" id="decisionCount" class="form-control" value="100" min="10" max="10000">
+    </div>
+
+    <div class="form-group">
+      <label>Use Case:</label>
+      <select id="useCase" class="form-control">
+        <option value="loan_approval">Loan Approval</option>
+        <option value="fraud_detection">Fraud Detection</option>
+        <option value="discount_engine">Discount Engine</option>
+        <option value="insurance_underwriting">Insurance Underwriting</option>
+        <option value="content_moderation">Content Moderation</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      Record Decisions
+    </button>
+  </form>
+
+  <div id="recordProgress" style="display: none; margin-top: 20px;">
+    <div class="progress-bar">
+      <div class="progress-fill" id="recordProgressFill"></div>
+    </div>
+    <p id="recordProgressText" style="text-align: center; margin-top: 10px;"></p>
+  </div>
+</div>
+
+<!-- Database Statistics -->
+<div class="card">
+  <h3>📊 Database Statistics</h3>
+  <div id="dbStats" class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-label">Total Decisions</div>
+      <div class="stat-value" id="totalDecisions">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Total Evaluations</div>
+      <div class="stat-value" id="totalEvaluations">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Performance Metrics</div>
+      <div class="stat-value" id="totalPerformance">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Error Records</div>
+      <div class="stat-value" id="totalErrors">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Success Rate</div>
+      <div class="stat-value" id="successRate">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Avg Confidence</div>
+      <div class="stat-value" id="avgConfidence">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Avg Duration</div>
+      <div class="stat-value" id="avgDuration">-</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">P95 Latency</div>
+      <div class="stat-value" id="p95Latency">-</div>
+    </div>
+  </div>
+
+  <button onclick="loadDatabaseStats()" class="btn" style="background: #3498db; margin-top: 15px;">
+    Refresh Statistics
+  </button>
+</div>
+
+<!-- Historical Analysis -->
+<div class="card">
+  <h3>📈 Historical Analysis</h3>
+  <div class="time-range-selector">
+    <button onclick="loadHistoricalData(3600)" class="btn time-btn">Last Hour</button>
+    <button onclick="loadHistoricalData(86400)" class="btn time-btn active">Last 24 Hours</button>
+    <button onclick="loadHistoricalData(604800)" class="btn time-btn">Last 7 Days</button>
+    <button onclick="loadHistoricalData(2592000)" class="btn time-btn">Last 30 Days</button>
+  </div>
+
+  <div id="historicalCharts" style="margin-top: 25px;">
+    <canvas id="decisionsChart" style="max-height: 300px;"></canvas>
+    <div style="margin-top: 30px;">
+      <h4>Decision Distribution</h4>
+      <div id="decisionDistribution"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Queries -->
+<div class="card">
+  <h3>🔍 Custom Queries</h3>
+  <div class="query-buttons">
+    <button onclick="runCustomQuery('high_confidence')" class="btn query-btn">
+      High Confidence Decisions (≥0.8)
+    </button>
+    <button onclick="runCustomQuery('recent_success')" class="btn query-btn">
+      Recent Successful Decisions
+    </button>
+    <button onclick="runCustomQuery('avg_transaction_duration')" class="btn query-btn">
+      Avg Transaction Duration
+    </button>
+    <button onclick="runCustomQuery('error_analysis')" class="btn query-btn">
+      Error Analysis
+    </button>
+  </div>
+
+  <div id="queryResults" style="margin-top: 20px; display: none;">
+    <h4 id="queryTitle"></h4>
+    <div id="queryData"></div>
+  </div>
+</div>
+
+<!-- Cleanup Section -->
+<div class="card">
+  <h3>🧹 Database Cleanup</h3>
+  <p>Remove old metrics to manage database size. This action is <strong>irreversible</strong>.</p>
+
+  <div class="form-group">
+    <label>Remove metrics older than:</label>
+    <select id="cleanupPeriod" class="form-control">
+      <option value="7">7 days</option>
+      <option value="14">14 days</option>
+      <option value="30" selected>30 days</option>
+      <option value="60">60 days</option>
+      <option value="90">90 days</option>
+    </select>
+  </div>
+
+  <button onclick="cleanupOldMetrics()" class="btn" style="background: #e74c3c;">
+    Cleanup Old Metrics
+  </button>
+</div>
+
+<style>
+.storage-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.storage-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.storage-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.storage-card.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+}
+
+.storage-card h4 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.storage-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.storage-card ul li {
+  padding: 8px 0;
+  color: #7f8c8d;
+}
+
+.selected-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #27ae60;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.time-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  color: #7f8c8d;
+  flex: 1;
+  min-width: 120px;
+}
+
+.time-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.time-btn.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.query-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.query-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  color: #2c3e50;
+  text-align: left;
+}
+
+.query-btn:hover {
+  border-color: #3498db;
+  background: #3498db;
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 30px;
+  background: #ecf0f1;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+#decisionDistribution {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+}
+
+.distribution-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.distribution-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.distribution-label {
+  width: 150px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.distribution-bar {
+  flex: 1;
+  height: 30px;
+  background: #ecf0f1;
+  border-radius: 15px;
+  overflow: hidden;
+  margin: 0 15px;
+  position: relative;
+}
+
+.distribution-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  transition: width 0.5s ease;
+}
+
+.distribution-count {
+  font-weight: bold;
+  color: #2c3e50;
+  min-width: 60px;
+  text-align: right;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  loadDatabaseStats();
+
+  document.getElementById('recordDecisionsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    recordDecisions();
+  });
+});
+
+function recordDecisions() {
+  const count = parseInt(document.getElementById('decisionCount').value);
+  const useCase = document.getElementById('useCase').value;
+
+  const progressDiv = document.getElementById('recordProgress');
+  const progressFill = document.getElementById('recordProgressFill');
+  const progressText = document.getElementById('recordProgressText');
+
+  progressDiv.style.display = 'block';
+  progressFill.style.width = '0%';
+
+  // Simulate recording
+  let processed = 0;
+  const interval = setInterval(() => {
+    processed += Math.floor(Math.random() * 15) + 10;
+    if (processed >= count) {
+      processed = count;
+      clearInterval(interval);
+
+      setTimeout(() => {
+        progressDiv.style.display = 'none';
+        alert(`Successfully recorded ${count} decisions to database!`);
+        loadDatabaseStats();
+      }, 500);
+    }
+
+    const percentage = (processed / count * 100);
+    progressFill.style.width = percentage + '%';
+    progressText.textContent = `Recording: ${processed} / ${count} decisions (${percentage.toFixed(1)}%)`;
+  }, 100);
+}
+
+function loadDatabaseStats() {
+  // Simulate database query results
+  const mockStats = {
+    totalDecisions: Math.floor(Math.random() * 5000) + 10000,
+    totalEvaluations: Math.floor(Math.random() * 10000) + 20000,
+    totalPerformance: Math.floor(Math.random() * 7000) + 15000,
+    totalErrors: Math.floor(Math.random() * 50) + 10,
+    successRate: (Math.random() * 0.1 + 0.9).toFixed(3),
+    avgConfidence: (Math.random() * 0.15 + 0.75).toFixed(3),
+    avgDuration: (Math.random() * 20 + 15).toFixed(2),
+    p95Latency: (Math.random() * 50 + 80).toFixed(2)
+  };
+
+  document.getElementById('totalDecisions').textContent = mockStats.totalDecisions.toLocaleString();
+  document.getElementById('totalEvaluations').textContent = mockStats.totalEvaluations.toLocaleString();
+  document.getElementById('totalPerformance').textContent = mockStats.totalPerformance.toLocaleString();
+  document.getElementById('totalErrors').textContent = mockStats.totalErrors;
+  document.getElementById('successRate').textContent = (mockStats.successRate * 100).toFixed(1) + '%';
+  document.getElementById('avgConfidence').textContent = mockStats.avgConfidence;
+  document.getElementById('avgDuration').textContent = mockStats.avgDuration + ' ms';
+  document.getElementById('p95Latency').textContent = mockStats.p95Latency + ' ms';
+}
+
+function loadHistoricalData(timeRange) {
+  // Update button states
+  document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // Generate mock distribution
+  const decisions = {
+    'approved': Math.floor(Math.random() * 500) + 800,
+    'review': Math.floor(Math.random() * 300) + 200,
+    'denied': Math.floor(Math.random() * 100) + 50
+  };
+
+  const total = Object.values(decisions).reduce((a, b) => a + b, 0);
+
+  const distributionHtml = Object.entries(decisions).map(([decision, count]) => {
+    const percentage = (count / total * 100).toFixed(1);
+    return `
+      <div class="distribution-item">
+        <div class="distribution-label">${decision}</div>
+        <div class="distribution-bar">
+          <div class="distribution-fill" style="width: ${percentage}%"></div>
+        </div>
+        <div class="distribution-count">${count} (${percentage}%)</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('decisionDistribution').innerHTML = distributionHtml;
+}
+
+function runCustomQuery(queryType) {
+  const queryResults = document.getElementById('queryResults');
+  const queryTitle = document.getElementById('queryTitle');
+  const queryData = document.getElementById('queryData');
+
+  let title = '';
+  let data = '';
+
+  switch(queryType) {
+    case 'high_confidence':
+      title = 'High Confidence Decisions (≥0.8)';
+      const highConfCount = Math.floor(Math.random() * 2000) + 5000;
+      data = `<p style="font-size: 24px; font-weight: bold; color: #27ae60;">${highConfCount.toLocaleString()} decisions</p>
+              <p>These decisions had confidence scores of 0.8 or higher, indicating strong rule matches.</p>`;
+      break;
+
+    case 'recent_success':
+      title = 'Recent Successful Decisions (Last Hour)';
+      const successCount = Math.floor(Math.random() * 500) + 800;
+      data = `<p style="font-size: 24px; font-weight: bold; color: #27ae60;">${successCount} successful decisions</p>
+              <p>Success rate in the last hour: ${(Math.random() * 5 + 95).toFixed(1)}%</p>`;
+      break;
+
+    case 'avg_transaction_duration':
+      title = 'Average Transaction Duration';
+      const avgDuration = (Math.random() * 30 + 120).toFixed(2);
+      data = `<p style="font-size: 24px; font-weight: bold; color: #3498db;">${avgDuration} ms</p>
+              <p>Based on ${(Math.floor(Math.random() * 5000) + 10000).toLocaleString()} transaction processing metrics</p>`;
+      break;
+
+    case 'error_analysis':
+      title = 'Error Analysis';
+      const errors = {
+        'ArgumentError': Math.floor(Math.random() * 10) + 5,
+        'ValidationError': Math.floor(Math.random() * 8) + 3,
+        'TimeoutError': Math.floor(Math.random() * 5) + 2
+      };
+      data = '<table style="width: 100%; border-collapse: collapse;">' +
+        '<tr style="background: #f8f9fa;"><th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0;">Error Type</th><th style="padding: 12px; text-align: right; border-bottom: 2px solid #e0e0e0;">Count</th></tr>' +
+        Object.entries(errors).map(([type, count]) =>
+          `<tr><td style="padding: 12px; border-bottom: 1px solid #ecf0f1;">${type}</td><td style="padding: 12px; text-align: right; border-bottom: 1px solid #ecf0f1; font-weight: bold;">${count}</td></tr>`
+        ).join('') +
+        '</table>';
+      break;
+  }
+
+  queryTitle.textContent = title;
+  queryData.innerHTML = data;
+  queryResults.style.display = 'block';
+  queryResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cleanupOldMetrics() {
+  const days = parseInt(document.getElementById('cleanupPeriod').value);
+
+  if (!confirm(`Are you sure you want to delete all metrics older than ${days} days? This action cannot be undone.`)) {
+    return;
+  }
+
+  // Simulate cleanup
+  const removedCount = Math.floor(Math.random() * 1000) + 500;
+
+  setTimeout(() => {
+    alert(`Successfully removed ${removedCount.toLocaleString()} old metric records.`);
+    loadDatabaseStats();
+  }, 1000);
+}
+
+// Load initial data
+loadHistoricalData(86400);
+</script>

@@ -241,36 +241,33 @@ class ContentModerationUseCase
     end
 
     def evaluate_batch(contents, parallel: false)
-      contexts = contents.map do |content|
-        {
-          content_id: content[:content_id],
-          user_id: content[:user_id],
-          toxicity_score: content[:toxicity_score],
-          profanity_count: content[:profanity_count],
-          spam_likelihood: content[:spam_likelihood],
-          sexual_content_score: content[:sexual_content_score],
-          contains_hate_speech: content[:contains_hate_speech],
-          contains_violence: content[:contains_violence],
-          contains_csam: content[:contains_csam],
-          threat_level: content[:threat_level],
-          user_reputation_score: content[:user_reputation_score],
-          user_account_age_days: content[:user_account_age_days],
-          user_reports_count: content[:user_reports_count],
-          external_links_count: content[:external_links_count],
-          misinformation_indicators: content[:misinformation_indicators],
-          user_previous_violations_count: content[:user_previous_violations_count]
-        }
+      setup_rules
+
+      start_time = Time.current
+
+      results = if parallel
+        contents.map do |content|
+          Thread.new { evaluate(content) }
+        end.map(&:value)
+      else
+        contents.map { |content| evaluate(content) }
       end
 
-      rule_ids = [
-        'content_severe_violations',
-        'content_high_risk',
-        'content_medium_risk',
-        'content_low_risk',
-        'content_safe'
-      ]
+      end_time = Time.current
+      duration = end_time - start_time
 
-      DecisionService.instance.evaluate_batch(rule_ids, contexts, parallel: parallel)
+      {
+        results: results,
+        performance: {
+          total_evaluations: contents.size,
+          duration_seconds: duration.round(3),
+          average_per_evaluation_ms: ((duration / contents.size) * 1000).round(2),
+          evaluations_per_second: (contents.size / duration).round(2),
+          parallel: parallel,
+          started_at: start_time,
+          completed_at: end_time
+        }
+      }
     end
   end
 end

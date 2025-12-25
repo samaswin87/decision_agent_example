@@ -182,6 +182,37 @@ class LoanApprovalUseCase
     end
   end
 
+  # Batch evaluation for multiple loan applications
+  def self.evaluate_batch(applications, parallel: false)
+    setup_rules
+
+    start_time = Time.current
+
+    results = if parallel
+      applications.map do |app|
+        Thread.new { evaluate(app) }
+      end.map(&:value)
+    else
+      applications.map { |app| evaluate(app) }
+    end
+
+    end_time = Time.current
+    duration = end_time - start_time
+
+    {
+      results: results,
+      performance: {
+        total_evaluations: applications.size,
+        duration_seconds: duration.round(3),
+        average_per_evaluation_ms: ((duration / applications.size) * 1000).round(2),
+        evaluations_per_second: (applications.size / duration).round(2),
+        parallel: parallel,
+        started_at: start_time,
+        completed_at: end_time
+      }
+    }
+  end
+
   private
 
   def self.format_result(result, applicant_data)

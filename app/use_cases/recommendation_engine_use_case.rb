@@ -252,28 +252,33 @@ class RecommendationEngineUseCase
     end
 
     def evaluate_batch(user_contexts, parallel: false)
-      contexts = user_contexts.map do |user|
-        {
-          user_id: user[:user_id],
-          user_interaction_count: user[:user_interaction_count],
-          profile_completeness: user[:profile_completeness],
-          days_since_last_visit: user[:days_since_last_visit],
-          is_new_user: user[:is_new_user],
-          is_holiday_season: user[:is_holiday_season],
-          is_user_birthday_month: user[:is_user_birthday_month],
-          special_event_active: user[:special_event_active]
-        }
+      setup_rules
+
+      start_time = Time.current
+
+      results = if parallel
+        user_contexts.map do |user|
+          Thread.new { evaluate(user) }
+        end.map(&:value)
+      else
+        user_contexts.map { |user| evaluate(user) }
       end
 
-      rule_ids = [
-        'recommendation_contextual',
-        'recommendation_highly_personalized',
-        'recommendation_reengagement',
-        'recommendation_personalized',
-        'recommendation_cold_start'
-      ]
+      end_time = Time.current
+      duration = end_time - start_time
 
-      DecisionService.instance.evaluate_batch(rule_ids, contexts, parallel: parallel)
+      {
+        results: results,
+        performance: {
+          total_evaluations: user_contexts.size,
+          duration_seconds: duration.round(3),
+          average_per_evaluation_ms: ((duration / user_contexts.size) * 1000).round(2),
+          evaluations_per_second: (user_contexts.size / duration).round(2),
+          parallel: parallel,
+          started_at: start_time,
+          completed_at: end_time
+        }
+      }
     end
 
     private

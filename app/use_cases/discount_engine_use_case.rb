@@ -182,6 +182,37 @@ class DiscountEngineUseCase
     evaluate(order_context)
   end
 
+  # Batch evaluation for multiple orders
+  def self.evaluate_batch(orders, parallel: false)
+    setup_rules
+
+    start_time = Time.current
+
+    results = if parallel
+      orders.map do |order|
+        Thread.new { evaluate(order) }
+      end.map(&:value)
+    else
+      orders.map { |order| evaluate(order) }
+    end
+
+    end_time = Time.current
+    duration = end_time - start_time
+
+    {
+      results: results,
+      performance: {
+        total_evaluations: orders.size,
+        duration_seconds: duration.round(3),
+        average_per_evaluation_ms: ((duration / orders.size) * 1000).round(2),
+        evaluations_per_second: (orders.size / duration).round(2),
+        parallel: parallel,
+        started_at: start_time,
+        completed_at: end_time
+      }
+    }
+  end
+
   def self.setup_rules
     service = DecisionService.instance
 

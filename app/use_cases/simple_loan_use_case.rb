@@ -100,6 +100,36 @@ class SimpleLoanUseCase
     end
   end
 
+  def self.evaluate_batch(applicants, parallel: false)
+    setup_rules
+
+    start_time = Time.current
+
+    results = if parallel
+      applicants.map do |applicant|
+        Thread.new { evaluate(applicant) }
+      end.map(&:value)
+    else
+      applicants.map { |applicant| evaluate(applicant) }
+    end
+
+    end_time = Time.current
+    duration = end_time - start_time
+
+    {
+      results: results,
+      performance: {
+        total_evaluations: applicants.size,
+        duration_seconds: duration.round(3),
+        average_per_evaluation_ms: ((duration / applicants.size) * 1000).round(2),
+        evaluations_per_second: (applicants.size / duration).round(2),
+        parallel: parallel,
+        started_at: start_time,
+        completed_at: end_time
+      }
+    }
+  end
+
   private
 
   def self.format_result(result, applicant_data)
