@@ -1,0 +1,16 @@
+{
+  "id": "asa_v1",
+  "rule_id": "asa",
+  "version_number": 1,
+  "content": {
+    "version": "1.0",
+    "ruleset": "asa",
+    "rules": [
+
+    ]
+  },
+  "created_by": "system",
+  "created_at": "2025-12-20T04:06:10Z",
+  "changelog": "",
+  "status": "active"
+}

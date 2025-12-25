@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Discount Engine Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+    h1 { color: #333; margin-bottom: 20px; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .btn {
+      background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn:hover { opacity: 0.9; }
+    .result {
+      background: #fff3cd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border-left: 4px solid #f2994a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎁 Discount Engine Demo</h1>
+      <p>Calculate optimal discounts for your order</p>
+      <a href="/demo/test_center" style="color: #f2994a; text-decoration: none;">← Back to Test Center</a>
+
+      <form method="post" style="margin-top: 30px;">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+
+        <div class="form-group">
+          <label>Customer ID</label>
+          <input type="text" name="customer_id" value="CUST<%= rand(1000..9999) %>" required>
+        </div>
+
+        <div class="form-group">
+          <label>Customer Tier</label>
+          <select name="customer_tier">
+            <option value="bronze">Bronze</option>
+            <option value="silver" selected>Silver</option>
+            <option value="gold">Gold</option>
+            <option value="platinum">Platinum</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Cart Total ($)</label>
+          <input type="number" name="cart_total" value="150.00" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label>Total Items</label>
+          <input type="number" name="total_items" value="5" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label>First Purchase?</label>
+          <select name="is_first_purchase">
+            <option value="0" selected>No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn">Calculate Discount</button>
+      </form>
+
+      <% if @result %>
+        <div class="result">
+          <h2>Discount Calculation Results</h2>
+
+          <% if @result[:order] %>
+            <p><strong>Customer:</strong> <%= @result[:order][:customer_id] %> (<%= @result[:order][:customer_tier]&.capitalize || 'Standard' %> Tier)</p>
+            <p><strong>Cart Total:</strong> $<%= @result[:order][:cart_total] %></p>
+            <p><strong>Total Items:</strong> <%= @result[:order][:total_items] %></p>
+          <% end %>
+
+          <p><strong>Decision:</strong> <%= @result[:decision] || 'N/A' %></p>
+          <p><strong>Confidence:</strong> <%= @result[:confidence] ? (@result[:confidence] * 100).round(1) : 0 %>%</p>
+
+          <% if @result[:explanations]&.any? %>
+            <p><strong>Discount Details:</strong></p>
+            <ul>
+              <% @result[:explanations].each do |explanation| %>
+                <li><%= explanation %></li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <% if @result[:evaluated_at] %>
+            <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
+              Evaluated at: <%= @result[:evaluated_at].strftime('%Y-%m-%d %H:%M:%S') %>
+            </p>
+          <% end %>
+
+          <% if @result[:error] %>
+            <p style="color: #dc3545; margin-top: 15px;">
+              <strong>Error:</strong> <%= @result[:error] %>
+            </p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

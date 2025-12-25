@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Full Test Suite Results</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .results {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .test-section {
+      margin-bottom: 30px;
+    }
+    .test-item {
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+    }
+    .passed { background: #d4edda; }
+    .failed { background: #f8d7da; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Full Test Suite Results</h1>
+      <p>Comprehensive test results across all categories</p>
+      <a href="/demo/test_center" style="color: #667eea;">← Back</a>
+    </div>
+
+    <div class="results">
+      <div class="test-section">
+        <h2>Use Case Tests</h2>
+        <% @test_results[:use_cases].each do |result| %>
+          <div class="test-item <%= result[:status] %>">
+            <%= result[:status] == 'passed' ? '✅' : '❌' %>
+            <%= result[:name] %>
+            <% if result[:error] %>
+              <br><small style="color: #dc3545;"><%= result[:error] %></small>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

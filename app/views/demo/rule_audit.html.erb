@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rule Audit Trail</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .audit-list {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .audit-item {
+      padding: 15px;
+      border-left: 4px solid #667eea;
+      margin-bottom: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📜 Rule Audit Trail</h1>
+      <p>Complete history of all rule changes</p>
+      <a href="/demo/test_center" style="color: #667eea;">← Back</a>
+    </div>
+
+    <div class="audit-list">
+      <h2>Recent Changes (Last 50)</h2>
+      <% if @audit_entries.any? %>
+        <% @audit_entries.each do |entry| %>
+          <div class="audit-item">
+            <strong><%= entry.rule_id %></strong> - Version <%= entry.version_number %>
+            <br>
+            <small style="color: #666;">
+              <%= entry.created_at.strftime("%Y-%m-%d %H:%M:%S") %> by <%= entry.created_by || 'unknown' %>
+            </small>
+            <% if entry.changelog.present? %>
+              <br>
+              <small><%= entry.changelog %></small>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p>No audit entries found.</p>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

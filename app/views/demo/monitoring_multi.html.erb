@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multi-Use Case Monitoring Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #007bff;
+      padding-bottom: 10px;
+    }
+    .use-case-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .use-case-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .use-case-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 15px;
+    }
+    .use-case-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+    .use-case-description {
+      color: #666;
+      font-size: 14px;
+      margin: 5px 0 15px 0;
+    }
+    .context-editor {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .context-editor textarea {
+      width: 100%;
+      min-height: 200px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      border: none;
+      background: transparent;
+      resize: vertical;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #218838;
+    }
+    .result-container {
+      display: none;
+      margin-top: 15px;
+    }
+    .result-container.show {
+      display: block;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .result-title {
+      font-weight: bold;
+      color: #333;
+    }
+    .result-timestamp {
+      color: #666;
+      font-size: 12px;
+    }
+    .result-content {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+    }
+    .result-content pre {
+      margin: 0;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 4px;
+    }
+    .metric {
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    .metric-value.success {
+      color: #28a745;
+    }
+    .metric-value.warning {
+      color: #ffc107;
+    }
+    .metric-value.error {
+      color: #dc3545;
+    }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Multi-Use Case Monitoring Dashboard</h1>
+  <p style="color: #666; font-size: 16px;">
+    Monitor and evaluate multiple decision use cases with real-time metrics and detailed results.
+  </p>
+
+  <div class="use-case-grid">
+    <% @use_cases.each do |use_case| %>
+      <div class="use-case-card" id="card-<%= use_case[:id] %>">
+        <div class="use-case-header">
+          <div>
+            <h2 class="use-case-title"><%= use_case[:name] %></h2>
+            <p class="use-case-description"><%= use_case[:description] %></p>
+          </div>
+        </div>
+
+        <div class="context-editor">
+          <textarea id="context-<%= use_case[:id] %>"><%= JSON.pretty_generate(use_case[:sample_context]) %></textarea>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="evaluateUseCase('<%= use_case[:id] %>')">
+            Evaluate
+          </button>
+          <button class="btn-secondary" onclick="resetContext('<%= use_case[:id] %>', <%= use_case[:sample_context].to_json.html_safe %>)">
+            Reset
+          </button>
+          <button class="btn-success" onclick="loadSample('<%= use_case[:id] %>')">
+            Random Sample
+          </button>
+        </div>
+
+        <div id="result-<%= use_case[:id] %>" class="result-container">
+          <div class="result-header">
+            <span class="result-title">Result</span>
+            <span class="result-timestamp" id="timestamp-<%= use_case[:id] %>"></span>
+          </div>
+          <div class="result-content">
+            <pre id="result-content-<%= use_case[:id] %>"></pre>
+          </div>
+          <div class="metrics-grid" id="metrics-<%= use_case[:id] %>" style="display: none;">
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
+    <h3>📚 Available Use Cases</h3>
+    <p>This dashboard supports monitoring for multiple decision use cases. Each use case demonstrates different aspects of the decision_agent gem:</p>
+    <ul>
+      <li><strong>Simple Loan Approval</strong> - Basic credit evaluation with 4-tier decision logic</li>
+      <li><strong>Monitored Credit Decision</strong> - Full observability with performance metrics, SLA tracking, and audit logging</li>
+    </ul>
+
+    <p style="margin-top: 20px;">
+      <%= link_to "← Back to All Use Cases", demo_all_use_cases_path, style: "color: #007bff; text-decoration: none;" %>
+    </p>
+  </div>
+
+  <script>
+    async function evaluateUseCase(useCaseId) {
+      const card = document.getElementById(`card-${useCaseId}`);
+      const contextTextarea = document.getElementById(`context-${useCaseId}`);
+      const resultContainer = document.getElementById(`result-${useCaseId}`);
+      const resultContent = document.getElementById(`result-content-${useCaseId}`);
+      const timestamp = document.getElementById(`timestamp-${useCaseId}`);
+      const metricsGrid = document.getElementById(`metrics-${useCaseId}`);
+
+      card.classList.add('loading');
+      resultContainer.classList.add('show');
+      resultContent.textContent = 'Evaluating...';
+
+      try {
+        const contextJson = contextTextarea.value;
+
+        const response = await fetch('/demo/monitoring_multi_evaluate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+          },
+          body: JSON.stringify({
+            use_case_id: useCaseId,
+            context: contextJson
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          resultContent.textContent = JSON.stringify(data.result, null, 2);
+          timestamp.textContent = new Date(data.timestamp).toLocaleString();
+
+          // Show metrics if available
+          if (data.result.performance) {
+            displayMetrics(useCaseId, data.result);
+          } else {
+            metricsGrid.style.display = 'none';
+          }
+        } else {
+          resultContent.textContent = `Error: ${data.error}`;
+          metricsGrid.style.display = 'none';
+        }
+      } catch (error) {
+        resultContent.textContent = `Error: ${error.message}`;
+        metricsGrid.style.display = 'none';
+      } finally {
+        card.classList.remove('loading');
+      }
+    }
+
+    function displayMetrics(useCaseId, result) {
+      const metricsGrid = document.getElementById(`metrics-${useCaseId}`);
+
+      if (!result.performance) return;
+
+      const metrics = [];
+
+      // Decision
+      if (result.decision) {
+        metrics.push({
+          label: 'Decision',
+          value: result.decision,
+          class: result.decision === 'approved' ? 'success' : 'warning'
+        });
+      }
+
+      // Confidence
+      if (result.confidence !== undefined) {
+        metrics.push({
+          label: 'Confidence',
+          value: `${(result.confidence * 100).toFixed(0)}%`,
+          class: result.confidence > 0.8 ? 'success' : 'warning'
+        });
+      }
+
+      // Performance metrics
+      if (result.performance) {
+        metrics.push({
+          label: 'Latency',
+          value: `${result.performance.evaluation_time_ms}ms`,
+          class: result.performance.sla_breached ? 'error' : 'success'
+        });
+
+        if (result.performance.sla_target_ms) {
+          metrics.push({
+            label: 'SLA Status',
+            value: result.performance.sla_breached ? 'Breached' : 'Met',
+            class: result.performance.sla_breached ? 'error' : 'success'
+          });
+        }
+      }
+
+      // Monitoring metrics
+      if (result.monitoring) {
+        if (result.monitoring.rules_evaluated !== undefined) {
+          metrics.push({
+            label: 'Rules Evaluated',
+            value: result.monitoring.rules_evaluated,
+            class: ''
+          });
+        }
+
+        if (result.monitoring.category) {
+          metrics.push({
+            label: 'Category',
+            value: result.monitoring.category,
+            class: ''
+          });
+        }
+      }
+
+      // Build metrics HTML
+      metricsGrid.innerHTML = metrics.map(m => `
+        <div class="metric">
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-value ${m.class}">${m.value}</div>
+        </div>
+      `).join('');
+
+      metricsGrid.style.display = 'grid';
+    }
+
+    function resetContext(useCaseId, sampleContext) {
+      const contextTextarea = document.getElementById(`context-${useCaseId}`);
+      contextTextarea.value = JSON.stringify(sampleContext, null, 2);
+    }
+
+    function loadSample(useCaseId) {
+      const samples = {
+        simple_loan: [
+          { name: 'Alice Smith', email: 'alice@example.com', credit_score: 780, annual_income: 85000, debt_to_income_ratio: 0.25 },
+          { name: 'Bob Johnson', email: 'bob@example.com', credit_score: 650, annual_income: 45000, debt_to_income_ratio: 0.40 },
+          { name: 'Carol White', email: 'carol@example.com', credit_score: 580, annual_income: 30000, debt_to_income_ratio: 0.50 }
+        ],
+        monitored_credit: [
+          { credit_score: 800, requested_amount: 50000, debt_to_income: 0.20, recent_bankruptcies: 0, employment_years: 10 },
+          { credit_score: 670, requested_amount: 25000, debt_to_income: 0.35, recent_bankruptcies: 0, employment_years: 3 },
+          { credit_score: 620, requested_amount: 15000, debt_to_income: 0.45, recent_bankruptcies: 0, employment_years: 2 }
+        ]
+      };
+
+      const useCaseSamples = samples[useCaseId];
+      if (useCaseSamples) {
+        const randomSample = useCaseSamples[Math.floor(Math.random() * useCaseSamples.length)];
+        const contextTextarea = document.getElementById(`context-${useCaseId}`);
+        contextTextarea.value = JSON.stringify(randomSample, null, 2);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "id": "example_approval_rules_v2",
+  "rule_id": "example_approval_rules",
+  "version_number": 2,
+  "content": {
+    "version": "1.0",
+    "ruleset": "example_approval_rules",
+    "rules": [
+      {
+        "id": "high_priority_auto_approve",
+        "if": {
+          "all": [
+            {
+              "field": "priority",
+              "op": "eq",
+              "value": "high"
+            },
+            {
+              "field": "user.role",
+              "op": "eq",
+              "value": "admin"
+            }
+          ]
+        },
+        "then": {
+          "decision": "approve",
+          "weight": 0.95,
+          "reason": "High priority request from admin"
+        }
+      },
+      {
+        "id": "low_amount_approve",
+        "if": {
+          "all": [
+            {
+              "field": "amount",
+              "op": "lt",
+              "value": 1000
+            },
+            {
+              "field": "status",
+              "op": "eq",
+              "value": "active"
+            }
+          ]
+        },
+        "then": {
+          "decision": "approve",
+          "weight": 0.8,
+          "reason": "Low amount with active status"
+        }
+      },
+      {
+        "id": "missing_info_reject",
+        "if": {
+          "any": [
+            {
+              "field": "description",
+              "op": "blank"
+            },
+            {
+              "field": "assignee",
+              "op": "blank"
+            }
+          ]
+        },
+        "then": {
+          "decision": "needs_info",
+          "weight": 0.7,
+          "reason": "Missing required information"
+        }
+      }
+    ]
+  },
+  "created_by": "system",
+  "created_at": "2025-12-20T04:07:13Z",
+  "changelog": "",
+  "status": "archived"
+}

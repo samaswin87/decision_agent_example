@@ -1,0 +1,101 @@
+<div class="card">
+  <h2>Welcome to DecisionAgent Example Application</h2>
+  <p>This application demonstrates the <strong>decision_agent</strong> gem with thread-safety, versioning, and real-world use cases.</p>
+
+  <!-- NEW: Test Center Highlight -->
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">
+    <h2 style="margin-bottom: 15px; font-size: 2em;">🧪 New: Comprehensive Test Center</h2>
+    <p style="margin-bottom: 20px; font-size: 1.1em; opacity: 0.95;">Access all DecisionAgent features, test suites, data generation, and monitoring tools in one place!</p>
+    <a href="/demo/test_center" style="display: inline-block; background: white; color: #667eea; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1em; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+      Launch Test Center →
+    </a>
+  </div>
+
+  <h3 style="margin-top: 30px; margin-bottom: 15px;">🚀 Performance & Testing Tools</h3>
+
+  <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card" style="border-left: 4px solid #e74c3c;">
+      <h3 style="color: #e74c3c; margin-bottom: 10px;">📊 Performance Dashboard</h3>
+      <p style="margin-bottom: 15px;">Run comprehensive performance tests: single evaluation, batch processing, cache performance, and concurrent scalability.</p>
+      <a href="/demo/performance_dashboard" class="btn" style="text-decoration: none; background: #e74c3c;">Launch Dashboard →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #f39c12;">
+      <h3 style="color: #f39c12; margin-bottom: 10px;">🧵 Threading Visualization</h3>
+      <p style="margin-bottom: 15px;">Real-time visualization of multi-threaded execution with performance metrics and latency analysis.</p>
+      <a href="/demo/threading_visualization" class="btn" style="text-decoration: none; background: #f39c12;">View Threads →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #16a085;">
+      <h3 style="color: #16a085; margin-bottom: 10px;">📚 All Use Cases</h3>
+      <p style="margin-bottom: 15px;">Explore 9 real-world use case examples from fraud detection to content moderation.</p>
+      <a href="/demo/all_use_cases" class="btn" style="text-decoration: none; background: #16a085;">Explore →</a>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 40px; margin-bottom: 15px;">💼 Interactive Examples</h3>
+
+  <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card" style="border-left: 4px solid #27ae60;">
+      <h3 style="color: #27ae60; margin-bottom: 10px;">Loan Approval</h3>
+      <p style="margin-bottom: 15px;">Evaluate loan applications with multiple approval tiers based on credit score, income, and debt ratio.</p>
+      <a href="/demo/loan_approval" class="btn" style="text-decoration: none; background: #27ae60;">Try It →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #e67e22;">
+      <h3 style="color: #e67e22; margin-bottom: 10px;">Discount Engine</h3>
+      <p style="margin-bottom: 15px;">Calculate optimal discounts based on customer tier, cart value, and promotional campaigns.</p>
+      <a href="/demo/discount_engine" class="btn" style="text-decoration: none; background: #e67e22;">Try It →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #c0392b;">
+      <h3 style="color: #c0392b; margin-bottom: 10px;">Fraud Detection</h3>
+      <p style="margin-bottom: 15px;">Real-time transaction risk assessment with multi-level threat detection.</p>
+      <a href="/demo/fraud_detection" class="btn" style="text-decoration: none; background: #c0392b;">Try It →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #3498db;">
+      <h3 style="color: #3498db; margin-bottom: 10px;">Custom Evaluator</h3>
+      <p style="margin-bottom: 15px;">Test any rule with custom context data using JSON input.</p>
+      <a href="/demo/custom_evaluate" class="btn" style="text-decoration: none; background: #3498db;">Try It →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #9b59b6;">
+      <h3 style="color: #9b59b6; margin-bottom: 10px;">View Rules</h3>
+      <p style="margin-bottom: 15px;">Browse all rules, versions, and their configurations stored in the database.</p>
+      <a href="/demo/rules" class="btn" style="text-decoration: none; background: #9b59b6;">View →</a>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 40px; margin-bottom: 15px;">⚡ Command-Line Tools</h3>
+  <div class="card" style="background: #2c3e50; color: white; padding: 20px;">
+    <h4 style="margin-bottom: 15px;">Available Rake Tasks:</h4>
+    <pre style="background: #34495e; padding: 15px; border-radius: 5px; overflow-x: auto;"><code># Performance Benchmarks
+rake performance:benchmark              # Comprehensive performance suite
+rake performance:memory_profile         # Memory usage analysis
+rake performance:compare_use_cases      # Compare all use cases
+
+# Load Testing
+rake load_test:run[scenario,duration,threads]  # Configurable load test
+rake load_test:stress_test              # Find breaking point
+rake load_test:endurance[duration]      # Long-running stability test
+
+# Examples:
+rake load_test:run[medium,60,4]         # Medium scenario, 60s, 4 threads
+rake load_test:stress_test               # Auto-scaling stress test
+rake load_test:endurance[10]            # 10-minute endurance test</code></pre>
+  </div>
+
+  <h3 style="margin-top: 40px; margin-bottom: 15px;">✨ Features</h3>
+  <ul style="list-style: none; padding: 0;">
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Thread-safe decision service with Singleton pattern</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Rule versioning with rollback capability</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ JSON-based rule definitions</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Batch evaluation with parallel processing</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Built-in caching for performance</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Real-time threading visualization</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Comprehensive performance benchmarking</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ Load testing with multiple scenarios</li>
+    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ 9 real-world use case examples</li>
+  </ul>
+</div>

@@ -1,0 +1,50 @@
+<div class="card">
+  <h2>All Rules</h2>
+  <p>Browse rules and their versions stored in the database.</p>
+
+  <% if @rules.any? %>
+    <% @rules.each do |rule| %>
+      <div class="card" style="background: #f8f9fa; margin-top: 15px;">
+        <h3><%= rule.rule_id %></h3>
+        <p><strong>Ruleset:</strong> <%= rule.ruleset %></p>
+        <p><strong>Description:</strong> <%= rule.description %></p>
+        <p><strong>Status:</strong> <span class="badge <%= rule.status %>"><%= rule.status %></span></p>
+
+        <details style="margin-top: 15px;">
+          <summary style="cursor: pointer; font-weight: bold;">Versions (<%= rule.rule_versions.count %>)</summary>
+          <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #2c3e50; color: white;">
+                <th style="padding: 10px; text-align: left;">Version</th>
+                <th style="padding: 10px; text-align: left;">Status</th>
+                <th style="padding: 10px; text-align: left;">Created By</th>
+                <th style="padding: 10px; text-align: left;">Changelog</th>
+                <th style="padding: 10px; text-align: left;">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% rule.rule_versions.order(version_number: :desc).each do |version| %>
+                <tr style="border-bottom: 1px solid #ddd;">
+                  <td style="padding: 10px;"><%= version.version_number %></td>
+                  <td style="padding: 10px;"><span class="badge <%= version.status %>"><%= version.status %></span></td>
+                  <td style="padding: 10px;"><%= version.created_by %></td>
+                  <td style="padding: 10px;"><%= version.changelog %></td>
+                  <td style="padding: 10px;"><%= version.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </details>
+
+        <% if rule.active_version %>
+          <details style="margin-top: 15px;">
+            <summary style="cursor: pointer; font-weight: bold;">Active Version Content</summary>
+            <pre><%= JSON.pretty_generate(rule.active_version.parsed_content) %></pre>
+          </details>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="text-align: center; padding: 40px; color: #999;">No rules found. Run <code>rails db:seed</code> to create example rules.</p>
+  <% end %>
+</div>

@@ -1,0 +1,60 @@
+<div class="card">
+  <h2>Loan Approval Example</h2>
+  <p>Enter applicant information to evaluate loan eligibility.</p>
+
+  <%= form_with url: demo_loan_approval_path, method: :post, local: true do |f| %>
+    <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="form-group">
+        <%= label_tag :name, "Full Name" %>
+        <%= text_field_tag :name, params[:name] || "John Doe", class: "form-control" %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag :email, "Email" %>
+        <%= email_field_tag :email, params[:email] || "john@example.com", class: "form-control" %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag :credit_score, "Credit Score" %>
+        <%= number_field_tag :credit_score, params[:credit_score] || 720, class: "form-control", min: 300, max: 850 %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag :annual_income, "Annual Income ($)" %>
+        <%= number_field_tag :annual_income, params[:annual_income] || 65000, class: "form-control", min: 0, step: 1000 %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag :debt_to_income_ratio, "Debt-to-Income Ratio" %>
+        <%= number_field_tag :debt_to_income_ratio, params[:debt_to_income_ratio] || 0.35, class: "form-control", min: 0, max: 1, step: 0.01 %>
+      </div>
+    </div>
+
+    <button type="submit">Evaluate Loan Application</button>
+  <% end %>
+
+  <% if @result %>
+    <div class="result <%= @result[:decision] == 'approved' ? 'success' : '' %>">
+      <h3>Result</h3>
+      <p><strong>Decision:</strong> <span class="badge <%= @result[:decision] %>"><%= @result[:decision].upcase %></span></p>
+      <p><strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%</p>
+
+      <% if @result[:explanations].present? %>
+        <h4 style="margin-top: 15px;">Explanations:</h4>
+        <ul class="explanations" style="list-style: none; padding: 0;">
+          <% @result[:explanations].each do |explanation| %>
+            <li style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px;"><%= explanation %></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card" style="background: #f8f9fa;">
+  <h3>Example Scenarios</h3>
+  <p><strong>Premium Approval:</strong> Credit Score ≥ 750, Income ≥ $75,000</p>
+  <p><strong>Standard Approval:</strong> Credit Score ≥ 650, Income ≥ $30,000, Debt Ratio ≤ 0.43</p>
+  <p><strong>Conditional:</strong> Credit Score ≥ 600, Income ≥ $25,000</p>
+  <p><strong>Rejected:</strong> Credit Score < 600 OR Income < $25,000</p>
+</div>

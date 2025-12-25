@@ -1,0 +1,303 @@
+<div class="container my-5">
+  <h1 class="mb-4">📚 All Use Case Examples</h1>
+
+  <div class="alert alert-info">
+    <strong>About These Use Cases:</strong> Each use case demonstrates decision_agent capabilities in different real-world scenarios.
+    Explore rule-based decision making across various industries and applications.
+  </div>
+
+  <div class="row">
+    <% @use_cases.each_with_index do |use_case, index| %>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><%= use_case[:name] %></h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text"><%= use_case[:description] %></p>
+
+            <% case use_case[:id] %>
+            <% when 'simple_loan' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>4-tier approval system</li>
+                <li>Credit score evaluation</li>
+                <li>Debt-to-income ratio analysis</li>
+                <li>Income-based decisions</li>
+              </ul>
+
+            <% when 'loan_approval' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Multi-tier approval levels</li>
+                <li>Employment history consideration</li>
+                <li>Loan amount calculation</li>
+                <li>Interest rate determination</li>
+              </ul>
+
+            <% when 'fraud_detection' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Real-time risk scoring</li>
+                <li>4 risk levels (safe to high)</li>
+                <li>Device fingerprinting</li>
+                <li>Location-based analysis</li>
+                <li>Transaction velocity detection</li>
+              </ul>
+
+            <% when 'discount_engine' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>5 discount rule types</li>
+                <li>Loyalty tier rewards</li>
+                <li>Promotional codes</li>
+                <li>Cart threshold bonuses</li>
+                <li>Best discount selection</li>
+              </ul>
+
+            <% when 'insurance_underwriting' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Auto insurance risk tiers</li>
+                <li>Driving history analysis</li>
+                <li>Premium calculation</li>
+                <li>Surcharge application</li>
+                <li>Coverage limit determination</li>
+              </ul>
+
+            <% when 'content_moderation' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Multi-layer safety system</li>
+                <li>Toxicity scoring</li>
+                <li>Automated filtering</li>
+                <li>Human review escalation</li>
+                <li>5 severity levels</li>
+              </ul>
+
+            <% when 'dynamic_pricing' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Real-time price optimization</li>
+                <li>Demand-based pricing</li>
+                <li>Inventory management</li>
+                <li>Surge pricing logic</li>
+                <li>Competitive analysis</li>
+              </ul>
+
+            <% when 'recommendation_engine' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Personalization levels</li>
+                <li>Cold start handling</li>
+                <li>Re-engagement strategies</li>
+                <li>Context-aware suggestions</li>
+                <li>Algorithm weight distribution</li>
+              </ul>
+
+            <% when 'multi_stage_workflow' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>4-stage approval process</li>
+                <li>Multi-level authorization</li>
+                <li>Conditional routing</li>
+                <li>Risk-based escalation</li>
+                <li>Workflow simulation</li>
+              </ul>
+            <% end %>
+
+            <div class="mt-3">
+              <button class="btn btn-primary btn-sm" onclick="testUseCase('<%= use_case[:id] %>')">
+                🧪 Quick Test
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Test Modal -->
+  <div class="modal fade" id="testModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="testModalTitle">Testing Use Case</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="testResults">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-3">Running test...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="runPerformanceTest()">
+            ⚡ Run Performance Test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Tools & Resources</h5>
+        </div>
+        <div class="card-body">
+          <a href="/demo/performance_dashboard" class="btn btn-outline-primary me-2">📊 Performance Dashboard</a>
+          <a href="/demo/threading_visualization" class="btn btn-outline-info me-2">🧵 Threading Visualization</a>
+          <a href="/demo/rules" class="btn btn-outline-secondary me-2">⚙️ Rule Manager</a>
+          <a href="/" class="btn btn-outline-dark">🏠 Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUseCase = null;
+
+async function testUseCase(useCaseId) {
+  currentUseCase = useCaseId;
+
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById('testModal'));
+  modal.show();
+
+  document.getElementById('testModalTitle').textContent = 'Testing: ' + useCaseId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  // Show loading
+  document.getElementById('testResults').innerHTML = `
+    <div class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3">Running test...</p>
+    </div>
+  `;
+
+  try {
+    // Run a quick single evaluation test
+    const params = new URLSearchParams({
+      test_type: 'single',
+      use_case: useCaseId,
+      iterations: 100
+    });
+
+    const response = await fetch('/demo/run_performance_test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: params
+    });
+
+    const data = await response.json();
+    displayQuickTestResults(data);
+  } catch (error) {
+    document.getElementById('testResults').innerHTML = `
+      <div class="alert alert-danger">
+        Error running test: ${error.message}
+      </div>
+    `;
+  }
+}
+
+function displayQuickTestResults(data) {
+  const html = `
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <h6 class="text-muted">Throughput</h6>
+            <h3 class="text-success">${data.throughput.toFixed(2)}</h3>
+            <p class="text-muted mb-0">operations/sec</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <h6 class="text-muted">Avg Latency</h6>
+            <h3 class="text-info">${data.latency.avg.toFixed(2)}</h3>
+            <p class="text-muted mb-0">milliseconds</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Test Summary</h6>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <tbody>
+            <tr>
+              <th>Iterations</th>
+              <td>${data.iterations}</td>
+            </tr>
+            <tr>
+              <th>Duration</th>
+              <td>${data.duration.toFixed(3)}s</td>
+            </tr>
+            <tr>
+              <th>Min Latency</th>
+              <td>${data.latency.min.toFixed(2)}ms</td>
+            </tr>
+            <tr>
+              <th>Max Latency</th>
+              <td>${data.latency.max.toFixed(2)}ms</td>
+            </tr>
+            <tr>
+              <th>P95 Latency</th>
+              <td>${data.latency.p95.toFixed(2)}ms</td>
+            </tr>
+            <tr>
+              <th>Errors</th>
+              <td class="${data.errors > 0 ? 'text-danger' : 'text-success'}">${data.errors}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <details>
+        <summary class="btn btn-outline-secondary btn-sm">View Raw JSON</summary>
+        <pre class="mt-2" style="max-height: 300px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 5px;">${JSON.stringify(data, null, 2)}</pre>
+      </details>
+    </div>
+  `;
+
+  document.getElementById('testResults').innerHTML = html;
+}
+
+function runPerformanceTest() {
+  if (currentUseCase) {
+    window.location.href = `/demo/performance_dashboard?use_case=${currentUseCase}`;
+  }
+}
+</script>
+
+<style>
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+</style>

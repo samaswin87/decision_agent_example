@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Monitoring Examples</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .results {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Test All Monitoring Examples</h1>
+      <p>Run automated tests on all 8 monitoring architecture patterns</p>
+      <a href="/demo/monitoring_examples" style="color: #667eea;">← Back</a>
+    </div>
+
+    <button class="btn" onclick="runTests()">Run All Monitoring Tests</button>
+
+    <div class="results" id="results">
+      <h2>Results</h2>
+      <pre id="results-content"></pre>
+    </div>
+  </div>
+
+  <script>
+    function runTests() {
+      fetch('/demo/run_monitoring_tests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('results-content').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('results').style.display = 'block';
+      });
+    }
+  </script>
+</body>
+</html>

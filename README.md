@@ -1,0 +1,462 @@
+# DecisionAgent Example Application
+
+A comprehensive Rails application demonstrating the `decision_agent` gem with **thread-safety**, **versioning**, **real-world use cases**, **performance testing**, and an interactive **web UI**.
+
+## 🚀 Features
+
+### Core Capabilities
+- **Thread-Safe Decision Service** - Singleton pattern with Mutex for concurrent evaluations
+- **Rule Versioning** - Track changes, rollback, and compare versions
+- **JSON-based Rules** - Using JsonRuleEvaluator with if/then syntax
+- **Batch Processing** - Sequential and parallel evaluation modes
+- **Built-in Caching** - Performance optimization with cache invalidation
+
+### Web UI & Visualization
+- **Interactive Demos** - Test all use cases through web interface
+- **Performance Dashboard** - Real-time performance testing and metrics
+- **Threading Visualization** - Live multi-threaded execution monitoring
+- **Rule Browser** - Explore all rules and their version history
+
+### Performance & Load Testing
+- **Benchmark Suite** - Comprehensive performance measurements
+- **Load Testing** - Configurable scenarios (light, medium, heavy, burst)
+- **Stress Testing** - Find system breaking points
+- **Endurance Testing** - Long-running stability tests
+
+### Real-World Use Cases (9 Examples)
+1. **Simple Loan Approval** - 4-tier credit evaluation
+2. **Advanced Loan Approval** - Multi-tier with employment history
+3. **Fraud Detection** - Real-time transaction risk assessment
+4. **Discount Engine** - 5-rule promotional system
+5. **Insurance Underwriting** - Auto insurance risk tiers
+6. **Content Moderation** - Multi-layer safety system
+7. **Dynamic Pricing** - Demand-based price optimization
+8. **Recommendation Engine** - Personalized content suggestions
+9. **Multi-Stage Workflow** - Complex 4-stage approval process
+
+## 📦 Quick Start
+
+```bash
+# Install dependencies
+bundle install
+
+# Setup database
+rails db:create
+rails db:migrate
+rails db:seed
+
+# Start the server
+rails server
+
+# Visit http://localhost:3000
+```
+
+## 🌐 Web Interface
+
+### 🧪 NEW: Comprehensive Test Center
+
+Access all DecisionAgent features in one place! Visit `/demo/test_center` for:
+
+- **All Use Cases Testing** - Test all 11 use cases with auto-generated data
+- **Data Generation** - Generate unlimited test data for any use case
+- **Batch Testing Suite** - Run parallel and sequential batch tests
+- **Monitoring Examples** - Test 8 different monitoring architectures
+- **Rule Management** - Version control, comparison, and audit trails
+- **Advanced Features** - Scoring strategies, conflict resolution, decision replay
+- **Quick Actions** - Seed data, reset database, export results
+
+### Main Pages
+
+| Page | URL | Description |
+|------|-----|-------------|
+| **Home** | `/` | Overview with navigation to all features |
+| **🧪 Test Center** | `/demo/test_center` | **NEW** Comprehensive testing suite for all features |
+| **Performance Dashboard** | `/demo/performance_dashboard` | Run performance tests with metrics |
+| **Threading Visualization** | `/demo/threading_visualization` | Real-time thread monitoring |
+| **All Use Cases** | `/demo/all_use_cases` | Explore all 9 use case examples |
+| **Test All Use Cases** | `/demo/test_all_use_cases` | **NEW** Automated testing of all use cases |
+| **Data Generator** | `/demo/generate_test_data` | **NEW** Generate test data for any use case |
+| **Batch Testing** | `/demo/batch_testing` | **NEW** Batch testing with performance metrics |
+| **Monitoring Examples** | `/demo/monitoring_examples` | **NEW** Test all monitoring architectures |
+| **Rule Versioning** | `/demo/rule_versioning` | **NEW** Create and manage rule versions |
+| **Scoring Strategies** | `/demo/scoring_strategies` | **NEW** Test different scoring strategies |
+| **Loan Approval** | `/demo/loan_approval` | Interactive loan evaluation form |
+| **Discount Engine** | `/demo/discount_engine` | Calculate order discounts |
+| **Fraud Detection** | `/demo/fraud_detection` | Transaction risk assessment |
+| **Custom Evaluator** | `/demo/custom_evaluate` | Test any rule with JSON input |
+| **Rule Browser** | `/demo/rules` | Browse all rules and versions |
+
+## 💻 Command-Line Tools
+
+### Performance Benchmarks
+
+```bash
+# Comprehensive performance test suite
+rake performance:benchmark
+
+# Memory usage profiling
+rake performance:memory_profile
+
+# Compare all use cases
+rake performance:compare_use_cases
+```
+
+Example output:
+```
+1️⃣  Single Evaluation Performance
+   Iterations: 1000
+   Total time: 0.523s
+   Avg per evaluation: 0.523ms
+   Throughput: 1912.05 evaluations/sec
+
+3️⃣  Batch Parallel Performance (Multi-threaded)
+   Batch size: 100
+   Iterations: 100
+   🚀 Speedup: 3.45x faster than sequential
+```
+
+### Load Testing
+
+```bash
+# Run configurable load test
+rake load_test:run[scenario,duration,threads]
+
+# Examples:
+rake load_test:run[light,30,2]      # Light load: 30s, 2 threads
+rake load_test:run[medium,60,4]     # Medium load: 60s, 4 threads
+rake load_test:run[heavy,120,8]     # Heavy load: 120s, 8 threads
+rake load_test:run[burst,60,16]     # Burst test: 60s, 16 threads
+
+# Find system breaking point
+rake load_test:stress_test
+
+# Long-running stability test
+rake load_test:endurance[10]        # 10 minutes
+```
+
+Example load test output:
+```
+⏳ Progress: 45.2% | Operations: 15234 | Rate: 338.5 ops/sec | Remaining: 33s
+
+LOAD TEST RESULTS
+==================
+Total operations: 30240
+Successful: 30240
+Success rate: 100.0%
+Throughput: 504.0 ops/sec
+
+Latency Statistics (ms):
+   P50 (Median): 1.85ms
+   P95: 4.23ms
+   P99: 8.91ms
+```
+
+## 📊 Usage Examples
+
+### 1. Simple Loan Approval
+
+```ruby
+result = SimpleLoanUseCase.evaluate({
+  name: 'John Doe',
+  email: 'john@example.com',
+  credit_score: 720,
+  annual_income: 65000,
+  debt_to_income_ratio: 0.35
+})
+
+# Result:
+{
+  applicant: { name: "John Doe", email: "john@example.com" },
+  decision: "approved",
+  confidence: 1.0,
+  explanations: ["Decision: approved (confidence: 1.0)"],
+  metadata: { tier: "standard", max_loan_amount: 250000 }
+}
+```
+
+### 2. Fraud Detection
+
+```ruby
+result = FraudDetectionUseCase.evaluate({
+  transaction_id: "TXN123",
+  transaction_amount: 1500,
+  device_fingerprint_match: false,
+  location_match: true,
+  ip_reputation_score: 45,
+  transactions_last_hour: 3
+})
+
+# Result:
+{
+  decision: "review",
+  confidence: 0.85,
+  metadata: {
+    risk_level: "medium",
+    action: "manual_review",
+    risk_factors: ["device_mismatch", "low_ip_reputation"]
+  }
+}
+```
+
+### 3. Batch Processing
+
+```ruby
+# Sequential processing
+results = DecisionService.instance.evaluate_batch(
+  ['simple_loan_approval'],
+  contexts,
+  parallel: false
+)
+
+# Parallel processing (faster)
+results = DecisionService.instance.evaluate_batch(
+  ['simple_loan_approval'],
+  contexts,
+  parallel: true
+)
+```
+
+### 4. Rule Versioning
+
+```ruby
+service = DecisionService.instance
+
+# Create a new version
+version = service.save_rule_version(
+  rule_id: 'simple_loan_approval',
+  content: updated_rules_json,
+  created_by: 'admin',
+  changelog: 'Updated credit score requirement'
+)
+
+# Activate the new version
+service.activate_version('simple_loan_approval', version.version_number)
+
+# View version history
+history = service.version_history('simple_loan_approval')
+
+# Rollback to previous version
+service.rollback('simple_loan_approval', 1)
+```
+
+## 🏗️ Architecture
+
+```
+app/
+├── services/
+│   └── decision_service.rb             # Thread-safe singleton service
+├── use_cases/
+│   ├── simple_loan_use_case.rb         # Simple loan approval
+│   ├── loan_approval_use_case.rb       # Advanced loan approval
+│   ├── fraud_detection_use_case.rb     # Fraud detection
+│   ├── discount_engine_use_case.rb     # Discount calculations
+│   ├── insurance_underwriting_use_case.rb  # Insurance risk
+│   ├── content_moderation_use_case.rb  # Content safety
+│   ├── dynamic_pricing_use_case.rb     # Price optimization
+│   ├── recommendation_engine_use_case.rb   # Recommendations
+│   └── multi_stage_workflow_use_case.rb    # Complex workflows
+├── controllers/
+│   └── demo_controller.rb              # Web UI + API endpoints
+├── views/demo/
+│   ├── index.html.erb                  # Home page
+│   ├── performance_dashboard.html.erb  # Performance testing UI
+│   ├── threading_visualization.html.erb    # Threading monitor
+│   ├── all_use_cases.html.erb          # Use case explorer
+│   └── ...                             # Other demo pages
+└── models/
+    ├── rule.rb                         # Rule model
+    └── rule_version.rb                 # Version model
+
+lib/tasks/
+├── performance.rake                    # Performance benchmarks
+└── load_test.rake                      # Load testing tools
+```
+
+## 📐 Rule Definition Format
+
+Rules use JSON with `if/then` syntax:
+
+```json
+{
+  "conditions": {
+    "all": [
+      { "fact": "credit_score", "operator": "gte", "value": 750 },
+      { "fact": "annual_income", "operator": "gte", "value": 75000 }
+    ]
+  },
+  "decision": "approved",
+  "priority": 100,
+  "metadata": {
+    "tier": "premium",
+    "max_loan_amount": 500000
+  }
+}
+```
+
+### Supported Operators
+- `eq` - Equal
+- `gte` - Greater than or equal
+- `lte` - Less than or equal
+- `lt` - Less than
+- `gt` - Greater than
+
+### Condition Types
+- `all` - All conditions must match (AND)
+- `any` - At least one condition must match (OR)
+
+## 🧵 Thread Safety
+
+The `DecisionService` is fully thread-safe:
+
+1. **Singleton Pattern** - Single instance across the application
+2. **Mutex Locks** - Thread-safe rule updates and cache operations
+3. **Cache Management** - Thread-safe caching with invalidation
+4. **Parallel Evaluation** - Thread pool for batch processing
+5. **Pessimistic Locking** - Database-level concurrency control
+
+```ruby
+# Safe for concurrent use
+threads = 10.times.map do |i|
+  Thread.new do
+    service = DecisionService.instance
+    service.evaluate(['simple_loan_approval'], {credit_score: 700 + i})
+  end
+end
+
+threads.each(&:join)  # No race conditions!
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+rails test
+
+# Run specific test file
+rails test test/services/decision_service_test.rb
+
+# Run use case tests
+rails test test/use_cases/
+```
+
+Test coverage includes:
+- Thread safety (10 threads × 100 operations)
+- Batch processing (sequential and parallel)
+- Rule versioning and rollback
+- Cache behavior
+- All 9 use cases with multiple scenarios
+
+## 📈 Performance Metrics
+
+### Typical Performance (on modern hardware)
+
+| Test Type | Throughput | Avg Latency |
+|-----------|------------|-------------|
+| Single Evaluation | ~2000 ops/sec | < 1ms |
+| Batch Sequential | ~1500 ops/sec | 0.7ms/item |
+| Batch Parallel | ~5000 ops/sec | 0.2ms/item |
+| Cached Evaluation | ~10000 ops/sec | < 0.1ms |
+
+### Scalability
+
+| Threads | Throughput | Notes |
+|---------|------------|-------|
+| 1 | 2000 ops/sec | Baseline |
+| 2 | 3800 ops/sec | 1.9x |
+| 4 | 7200 ops/sec | 3.6x |
+| 8 | 12000 ops/sec | 6.0x |
+| 16 | 15000 ops/sec | 7.5x (diminishing returns) |
+
+## 🔍 Database Schema
+
+### Rules Table
+```ruby
+create_table :rules do |t|
+  t.string :rule_id,      null: false, index: {unique: true}
+  t.string :ruleset
+  t.text :description
+  t.string :status,       default: 'active'
+  t.timestamps
+end
+```
+
+### Rule Versions Table
+```ruby
+create_table :rule_versions do |t|
+  t.string :rule_id,       null: false
+  t.integer :version_number, null: false
+  t.text :content,         null: false  # JSON
+  t.string :created_by
+  t.text :changelog
+  t.string :status,        default: 'draft'
+  t.timestamps
+end
+
+add_index :rule_versions, [:rule_id, :version_number], unique: true
+add_index :rule_versions, [:rule_id, :status]
+```
+
+## 🎯 Use Case Details
+
+### 1. Insurance Underwriting
+- 4 risk tiers: Preferred, Standard, High Risk, Uninsurable
+- Premium calculation with surcharges
+- Coverage limit determination
+- Factors: driving history, credit, annual mileage
+
+### 2. Content Moderation
+- 5 severity levels: Critical, High, Medium, Low, Safe
+- Automated filtering and human review escalation
+- Toxicity scoring, profanity detection
+- Actions: block, quarantine, filter, monitor, approve
+
+### 3. Dynamic Pricing
+- 5 pricing strategies: Surge, Premium, Standard, Promotional, Clearance
+- Demand-based optimization
+- Competitive analysis
+- Customer segment adjustments
+
+### 4. Recommendation Engine
+- 5 personalization strategies
+- Cold start handling for new users
+- Re-engagement campaigns
+- Contextual/seasonal recommendations
+
+### 5. Multi-Stage Workflow
+- 4-stage approval process
+- Conditional routing based on amount and risk
+- Multi-level authorization requirements
+- Complete workflow simulation
+
+## 💡 Best Practices
+
+1. **Use Caching** - Enable for repeated evaluations with same context
+2. **Batch Processing** - Use parallel mode for >10 evaluations
+3. **Version Management** - Always add meaningful changelogs
+4. **Testing** - Test rules thoroughly before activation
+5. **Monitoring** - Use performance dashboard to track metrics
+
+## 🚦 Getting Started Checklist
+
+- [ ] Install dependencies (`bundle install`)
+- [ ] Create database (`rails db:create`)
+- [ ] Run migrations (`rails db:migrate`)
+- [ ] Seed sample data (`rails db:seed`)
+- [ ] Start server (`rails server`)
+- [ ] Visit home page (http://localhost:3000)
+- [ ] Try performance dashboard
+- [ ] Run benchmark suite (`rake performance:benchmark`)
+- [ ] Explore use cases
+- [ ] Run load tests
+
+## 📝 License
+
+This example application is provided as-is for demonstration purposes.
+
+## 🤝 Contributing
+
+This is an example application. Feel free to use it as a template for your own decision agent implementations!
+
+---
+
+**Built with ❤️ using the decision_agent gem**

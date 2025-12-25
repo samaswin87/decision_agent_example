@@ -1,0 +1,167 @@
+<div style="max-width: 1200px; margin: 50px auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+  <h1>Monitoring & Observability Dashboard</h1>
+  <p style="color: #666;">Performance tracking, benchmarking, and real-time metrics</p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin: 30px 0;">
+
+    <!-- Single Evaluation -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3>📊 Single Evaluation</h3>
+      <p style="color: #666; font-size: 14px;">Evaluate a credit decision with full monitoring</p>
+
+      <%= form_with url: demo_monitoring_evaluate_path, method: :post, local: false, data: { type: :json }, html: { onsubmit: "evaluateSingle(event); return false;" } do |f| %>
+        <div style="margin-bottom: 10px;">
+          <label style="display: block; margin-bottom: 5px; font-size: 14px;">Credit Score:</label>
+          <%= f.number_field :credit_score, value: 720, style: "width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" %>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="display: block; margin-bottom: 5px; font-size: 14px;">Requested Amount:</label>
+          <%= f.number_field :requested_amount, value: 30000, style: "width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" %>
+        </div>
+
+        <%= f.submit "Evaluate", style: "width: 100%; background: #007bff; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;" %>
+      <% end %>
+
+      <div id="single-result" style="margin-top: 15px; display: none;">
+        <pre style="background: white; padding: 10px; border-radius: 4px; font-size: 12px; overflow: auto; max-height: 200px;"></pre>
+      </div>
+    </div>
+
+    <!-- Performance Benchmark -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3>⚡ Performance Benchmark</h3>
+      <p style="color: #666; font-size: 14px;">Run performance tests with detailed metrics</p>
+
+      <div style="margin-bottom: 10px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 14px;">Iterations:</label>
+        <input type="number" id="bench-iterations" value="1000" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 14px;">Warmup:</label>
+        <input type="number" id="bench-warmup" value="100" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+
+      <button onclick="runBenchmark()" style="width: 100%; background: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+        Run Benchmark
+      </button>
+
+      <div id="benchmark-result" style="margin-top: 15px; display: none;">
+        <pre style="background: white; padding: 10px; border-radius: 4px; font-size: 12px; overflow: auto; max-height: 200px;"></pre>
+      </div>
+    </div>
+
+    <!-- Load Test -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3>🔥 Load Test</h3>
+      <p style="color: #666; font-size: 14px;">Test performance under concurrent load</p>
+
+      <div style="margin-bottom: 10px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 14px;">Duration (seconds):</label>
+        <input type="number" id="load-duration" value="30" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 14px;">Concurrent Threads:</label>
+        <input type="number" id="load-threads" value="10" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+
+      <button onclick="runLoadTest()" style="width: 100%; background: #dc3545; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+        Run Load Test
+      </button>
+
+      <div id="load-result" style="margin-top: 15px; display: none;">
+        <pre style="background: white; padding: 10px; border-radius: 4px; font-size: 12px; overflow: auto; max-height: 200px;"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;">
+    <h3>📚 Documentation</h3>
+    <p>See <strong>UI_MONITORING_EXAMPLES.md</strong> for complete documentation and integration examples.</p>
+
+    <p style="margin-top: 20px;">
+      <%= link_to "← Back to All Use Cases", demo_all_use_cases_path, style: "color: #007bff; text-decoration: none;" %>
+    </p>
+  </div>
+</div>
+
+<script>
+async function evaluateSingle(event) {
+  event.preventDefault();
+  const form = event.target;
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData);
+
+  const resultDiv = document.getElementById('single-result');
+  resultDiv.style.display = 'block';
+  resultDiv.querySelector('pre').textContent = 'Evaluating...';
+
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    resultDiv.querySelector('pre').textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    resultDiv.querySelector('pre').textContent = 'Error: ' + error.message;
+  }
+}
+
+async function runBenchmark() {
+  const iterations = document.getElementById('bench-iterations').value;
+  const warmup = document.getElementById('bench-warmup').value;
+
+  const resultDiv = document.getElementById('benchmark-result');
+  resultDiv.style.display = 'block';
+  resultDiv.querySelector('pre').textContent = `Running benchmark with ${iterations} iterations...\nThis may take a minute...`;
+
+  try {
+    const response = await fetch(`/demo/monitoring_benchmark?iterations=${iterations}&warmup=${warmup}`, {
+      method: 'POST'
+    });
+
+    const result = await response.json();
+    const summary = {
+      throughput: result.test_phase.throughput_per_second + ' req/s',
+      latency: result.test_phase.latency_stats,
+      duration: result.total_duration_seconds + 's'
+    };
+    resultDiv.querySelector('pre').textContent = JSON.stringify(summary, null, 2);
+  } catch (error) {
+    resultDiv.querySelector('pre').textContent = 'Error: ' + error.message;
+  }
+}
+
+async function runLoadTest() {
+  const duration = document.getElementById('load-duration').value;
+  const threads = document.getElementById('load-threads').value;
+
+  const resultDiv = document.getElementById('load-result');
+  resultDiv.style.display = 'block';
+  resultDiv.querySelector('pre').textContent = `Running load test for ${duration} seconds with ${threads} threads...\nPlease wait...`;
+
+  try {
+    const response = await fetch(`/demo/monitoring_load_test?duration_seconds=${duration}&concurrent_threads=${threads}`, {
+      method: 'POST'
+    });
+
+    const result = await response.json();
+    const summary = {
+      total_requests: result.aggregate_metrics.total_requests,
+      throughput: result.aggregate_metrics.throughput_per_second + ' req/s',
+      error_rate: result.aggregate_metrics.error_rate + '%',
+      latency_p95: result.aggregate_metrics.latency_percentiles.p95 + 'ms',
+      latency_p99: result.aggregate_metrics.latency_percentiles.p99 + 'ms'
+    };
+    resultDiv.querySelector('pre').textContent = JSON.stringify(summary, null, 2);
+  } catch (error) {
+    resultDiv.querySelector('pre').textContent = 'Error: ' + error.message;
+  }
+}
+</script>

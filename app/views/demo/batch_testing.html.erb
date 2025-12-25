@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Batch Testing Suite</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .results {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 Batch Testing Suite</h1>
+      <p>Test batch processing with parallel and sequential modes</p>
+      <a href="/demo/test_center" style="color: #667eea;">← Back</a>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 15px;">
+      <div class="form-group">
+        <label>Use Case</label>
+        <select id="use_case">
+          <option value="simple_loan">Simple Loan Approval</option>
+          <option value="fraud_detection">Fraud Detection</option>
+          <option value="discount_engine">Discount Engine</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Batch Size</label>
+        <input type="number" id="batch_size" value="100" min="1" max="1000">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="parallel"> Enable Parallel Processing
+        </label>
+      </div>
+
+      <button class="btn" onclick="runBatchTest()">Run Batch Test</button>
+    </div>
+
+    <div class="results" id="results">
+      <h2>Results</h2>
+      <pre id="results-content"></pre>
+    </div>
+  </div>
+
+  <script>
+    function runBatchTest() {
+      const params = {
+        use_case: document.getElementById('use_case').value,
+        batch_size: document.getElementById('batch_size').value,
+        parallel: document.getElementById('parallel').checked
+      };
+
+      fetch('/demo/run_batch_tests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify(params)
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('results-content').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('results').style.display = 'block';
+      });
+    }
+  </script>
+</body>
+</html>

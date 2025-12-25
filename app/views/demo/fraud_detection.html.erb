@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fraud Detection Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+    h1 { color: #333; margin-bottom: 20px; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .btn {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn:hover { opacity: 0.9; }
+    .result {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .risk-high { background: #f8d7da; border-left: 4px solid #dc3545; }
+    .risk-medium { background: #fff3cd; border-left: 4px solid #ffc107; }
+    .risk-low { background: #d1ecf1; border-left: 4px solid #17a2b8; }
+    .risk-safe { background: #d4edda; border-left: 4px solid #28a745; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🛡️ Fraud Detection Demo</h1>
+      <p>Evaluate transaction risk in real-time</p>
+      <a href="/demo/test_center" style="color: #eb3349; text-decoration: none;">← Back to Test Center</a>
+
+      <form method="post" style="margin-top: 30px;">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+
+        <div class="form-group">
+          <label>Transaction ID</label>
+          <input type="text" name="transaction_id" value="TXN<%= rand(10000..99999) %>" required>
+        </div>
+
+        <div class="form-group">
+          <label>Transaction Amount ($)</label>
+          <input type="number" name="transaction_amount" value="1500" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label>Device Fingerprint Match</label>
+          <select name="device_fingerprint_match">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Location Match</label>
+          <select name="location_match">
+            <option value="1" selected>Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>IP Reputation Score (0-100)</label>
+          <input type="number" name="ip_reputation_score" value="45" min="0" max="100" required>
+        </div>
+
+        <div class="form-group">
+          <label>Transactions in Last Hour</label>
+          <input type="number" name="transactions_last_hour" value="3" min="0" required>
+        </div>
+
+        <button type="submit" class="btn">Evaluate Transaction Risk</button>
+      </form>
+
+      <% if @result %>
+        <div class="result risk-<%= @result[:risk_level] || 'unknown' %>">
+          <h2>Risk Assessment Results</h2>
+
+          <% if @result[:transaction] %>
+            <p><strong>Transaction ID:</strong> <%= @result[:transaction][:transaction_id] %></p>
+            <p><strong>Amount:</strong> $<%= @result[:transaction][:transaction_amount] %></p>
+          <% end %>
+
+          <p><strong>Decision:</strong> <%= @result[:decision]&.upcase || 'N/A' %></p>
+          <p><strong>Risk Level:</strong> <%= @result[:risk_level]&.upcase || 'UNKNOWN' %></p>
+          <p><strong>Confidence:</strong> <%= @result[:confidence] ? (@result[:confidence] * 100).round(1) : 0 %>%</p>
+
+          <% if @result[:explanations]&.any? %>
+            <p><strong>Explanation:</strong></p>
+            <ul>
+              <% @result[:explanations].each do |explanation| %>
+                <li><%= explanation %></li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <% if @result[:evaluated_at] %>
+            <p style="color: #666; font-size: 0.9em; margin-top: 15px;">
+              Evaluated at: <%= @result[:evaluated_at].strftime('%Y-%m-%d %H:%M:%S') %>
+            </p>
+          <% end %>
+
+          <% if @result[:error] %>
+            <p style="color: #dc3545; margin-top: 15px;">
+              <strong>Error:</strong> <%= @result[:error] %>
+            </p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

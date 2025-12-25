@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monitoring Architecture Examples</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .example-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .example-card h3 { color: #667eea; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ Monitoring Architecture Examples</h1>
+      <p>Explore <%= @examples.length %> different monitoring patterns</p>
+      <a href="/demo/test_center" style="color: #667eea;">← Back</a>
+      <br><br>
+      <a href="/demo/test_monitoring" style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
+        Run All Monitoring Tests →
+      </a>
+    </div>
+
+    <div class="examples-grid">
+      <% @examples.each do |example| %>
+        <div class="example-card">
+          <h3><%= example[:name] %></h3>
+          <p><%= example[:description] %></p>
+          <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+            <strong>Class:</strong> <%= example[:class] %>
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

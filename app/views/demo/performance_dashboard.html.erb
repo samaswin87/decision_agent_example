@@ -1,0 +1,389 @@
+<div class="container my-5">
+  <h1 class="mb-4">📊 Performance Testing Dashboard</h1>
+
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Performance Test Configuration</h5>
+        </div>
+        <div class="card-body">
+          <form id="performanceTestForm">
+            <div class="row">
+              <div class="col-md-4">
+                <label class="form-label">Test Type</label>
+                <select class="form-control" id="testType" name="test_type">
+                  <option value="single">Single Evaluation</option>
+                  <option value="batch">Batch Processing</option>
+                  <option value="cache">Cache Performance</option>
+                  <option value="concurrent">Concurrent Scalability</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Use Case</label>
+                <select class="form-control" id="useCase" name="use_case">
+                  <option value="simple_loan">Simple Loan Approval</option>
+                  <option value="fraud_detection">Fraud Detection</option>
+                  <option value="discount_engine">Discount Engine</option>
+                  <option value="insurance_underwriting">Insurance Underwriting</option>
+                  <option value="content_moderation">Content Moderation</option>
+                  <option value="dynamic_pricing">Dynamic Pricing</option>
+                  <option value="recommendation_engine">Recommendation Engine</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Iterations</label>
+                <input type="number" class="form-control" id="iterations" name="iterations" value="1000" min="10" max="100000">
+                <small class="text-muted" id="iterationsHelp">Number of operations to perform</small>
+              </div>
+            </div>
+            <div class="mt-3">
+              <button type="submit" class="btn btn-success btn-lg" id="runTestBtn">
+                ⚡ Run Performance Test
+              </button>
+              <span id="loadingSpinner" class="ms-3" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                Running test...
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Results -->
+  <div id="resultsSection" style="display: none;">
+    <!-- Single Evaluation Results -->
+    <div id="singleResults" style="display: none;">
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">Total Iterations</h6>
+              <h2 class="card-title" id="singleIterations">-</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">Throughput</h6>
+              <h2 class="card-title text-success" id="singleThroughput">-</h2>
+              <small class="text-muted">ops/sec</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">Avg Latency</h6>
+              <h2 class="card-title text-info" id="singleAvgLatency">-</h2>
+              <small class="text-muted">ms</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">P95 Latency</h6>
+              <h2 class="card-title text-warning" id="singleP95">-</h2>
+              <small class="text-muted">ms</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch Results -->
+    <div id="batchResults" style="display: none;">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">Sequential Processing</h5>
+            </div>
+            <div class="card-body text-center">
+              <h3 id="batchSeqDuration">-</h3>
+              <p class="text-muted">Duration (seconds)</p>
+              <h4 class="text-success" id="batchSeqThroughput">-</h4>
+              <p class="text-muted">ops/sec</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">Parallel Processing</h5>
+            </div>
+            <div class="card-body text-center">
+              <h3 id="batchParDuration">-</h3>
+              <p class="text-muted">Duration (seconds)</p>
+              <h4 class="text-success" id="batchParThroughput">-</h4>
+              <p class="text-muted">ops/sec</p>
+              <div class="alert alert-success mt-3" id="speedupAlert" style="display: none;">
+                <strong>⚡ Speedup: <span id="batchSpeedup">-</span>x faster!</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cache Results -->
+    <div id="cacheResults" style="display: none;">
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Cold Cache</h5>
+            </div>
+            <div class="card-body text-center">
+              <h3 id="cacheColdDuration">-</h3>
+              <p class="text-muted">seconds</p>
+              <h4 id="cacheColdThroughput">-</h4>
+              <p class="text-muted">ops/sec</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">Warm Cache</h5>
+            </div>
+            <div class="card-body text-center">
+              <h3 id="cacheWarmDuration">-</h3>
+              <p class="text-muted">seconds</p>
+              <h4 class="text-success" id="cacheWarmThroughput">-</h4>
+              <p class="text-muted">ops/sec</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">Improvement</h5>
+            </div>
+            <div class="card-body text-center">
+              <h2 class="text-primary" id="cacheImprovement">-</h2>
+              <p class="text-muted">faster with cache</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concurrent Results -->
+    <div id="concurrentResults" style="display: none;">
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">Scalability by Thread Count</h5>
+            </div>
+            <div class="card-body">
+              <div id="concurrentChart"></div>
+              <div class="mt-3 alert alert-info">
+                <strong>Optimal Thread Count: <span id="optimalThreads">-</span></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Raw JSON -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Raw Test Results (JSON)</h5>
+          </div>
+          <div class="card-body">
+            <pre id="rawJson" style="max-height: 400px; overflow-y: auto; background: #f5f5f5; padding: 15px; border-radius: 5px;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Additional Tools</h5>
+        </div>
+        <div class="card-body">
+          <a href="/demo/threading_visualization" class="btn btn-outline-primary me-2">🧵 Threading Visualization</a>
+          <a href="/demo/all_use_cases" class="btn btn-outline-info me-2">📚 All Use Cases</a>
+          <a href="/demo/rules" class="btn btn-outline-secondary me-2">⚙️ Rule Manager</a>
+          <a href="/" class="btn btn-outline-dark">🏠 Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('performanceTestForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const params = new URLSearchParams(formData);
+
+  // Show loading
+  document.getElementById('runTestBtn').disabled = true;
+  document.getElementById('loadingSpinner').style.display = 'inline-block';
+  document.getElementById('resultsSection').style.display = 'none';
+
+  try {
+    const response = await fetch('/demo/run_performance_test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: params
+    });
+
+    const data = await response.json();
+    displayResults(data);
+  } catch (error) {
+    alert('Error running test: ' + error.message);
+  } finally {
+    document.getElementById('runTestBtn').disabled = false;
+    document.getElementById('loadingSpinner').style.display = 'none';
+  }
+});
+
+function displayResults(data) {
+  // Hide all result sections
+  document.getElementById('singleResults').style.display = 'none';
+  document.getElementById('batchResults').style.display = 'none';
+  document.getElementById('cacheResults').style.display = 'none';
+  document.getElementById('concurrentResults').style.display = 'none';
+
+  // Show results section
+  document.getElementById('resultsSection').style.display = 'block';
+
+  // Show appropriate results based on test type
+  if (data.test_type === 'single_evaluation') {
+    displaySingleResults(data);
+  } else if (data.test_type === 'batch') {
+    displayBatchResults(data);
+  } else if (data.test_type === 'cache') {
+    displayCacheResults(data);
+  } else if (data.test_type === 'concurrent') {
+    displayConcurrentResults(data);
+  }
+
+  // Show raw JSON
+  document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+
+  // Scroll to results
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function displaySingleResults(data) {
+  document.getElementById('singleResults').style.display = 'block';
+  document.getElementById('singleIterations').textContent = data.iterations.toLocaleString();
+  document.getElementById('singleThroughput').textContent = data.throughput.toFixed(2);
+  document.getElementById('singleAvgLatency').textContent = data.latency.avg.toFixed(2);
+  document.getElementById('singleP95').textContent = data.latency.p95.toFixed(2);
+}
+
+function displayBatchResults(data) {
+  document.getElementById('batchResults').style.display = 'block';
+  document.getElementById('batchSeqDuration').textContent = data.sequential_duration.toFixed(3) + 's';
+  document.getElementById('batchSeqThroughput').textContent = data.sequential_throughput.toFixed(2);
+  document.getElementById('batchParDuration').textContent = data.parallel_duration.toFixed(3) + 's';
+  document.getElementById('batchParThroughput').textContent = data.parallel_throughput.toFixed(2);
+  document.getElementById('batchSpeedup').textContent = data.speedup.toFixed(2);
+  document.getElementById('speedupAlert').style.display = 'block';
+}
+
+function displayCacheResults(data) {
+  document.getElementById('cacheResults').style.display = 'block';
+  document.getElementById('cacheColdDuration').textContent = data.cold_cache_duration.toFixed(3) + 's';
+  document.getElementById('cacheColdThroughput').textContent = data.cold_throughput.toFixed(2);
+  document.getElementById('cacheWarmDuration').textContent = data.warm_cache_duration.toFixed(3) + 's';
+  document.getElementById('cacheWarmThroughput').textContent = data.warm_throughput.toFixed(2);
+  document.getElementById('cacheImprovement').textContent = data.improvement.toFixed(1) + '%';
+}
+
+function displayConcurrentResults(data) {
+  document.getElementById('concurrentResults').style.display = 'block';
+  document.getElementById('optimalThreads').textContent = data.optimal_thread_count;
+
+  // Render chart
+  let chartHtml = '<table class="table table-striped">';
+  chartHtml += '<thead><tr><th>Threads</th><th>Duration</th><th>Throughput</th><th>Performance</th></tr></thead>';
+  chartHtml += '<tbody>';
+
+  const maxThroughput = Math.max(...data.results.map(r => r.throughput));
+
+  data.results.forEach(result => {
+    const percentage = (result.throughput / maxThroughput) * 100;
+    const isOptimal = result.threads === data.optimal_thread_count;
+
+    chartHtml += `
+      <tr class="${isOptimal ? 'table-success' : ''}">
+        <td><strong>${result.threads} ${isOptimal ? '⭐' : ''}</strong></td>
+        <td>${result.duration}s</td>
+        <td>${result.throughput} ops/sec</td>
+        <td>
+          <div class="progress" style="height: 25px;">
+            <div class="progress-bar ${isOptimal ? 'bg-success' : 'bg-info'}"
+                 role="progressbar"
+                 style="width: ${percentage}%">
+              ${percentage.toFixed(1)}%
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+
+  chartHtml += '</tbody></table>';
+  document.getElementById('concurrentChart').innerHTML = chartHtml;
+}
+
+// Update help text based on test type
+document.getElementById('testType').addEventListener('change', function() {
+  const helpText = document.getElementById('iterationsHelp');
+  const iterationsInput = document.getElementById('iterations');
+
+  switch (this.value) {
+    case 'single':
+      helpText.textContent = 'Number of single evaluations';
+      iterationsInput.value = 1000;
+      break;
+    case 'batch':
+      helpText.textContent = 'Batch size for processing';
+      iterationsInput.value = 100;
+      break;
+    case 'cache':
+      helpText.textContent = 'Number of cached evaluations';
+      iterationsInput.value = 1000;
+      break;
+    case 'concurrent':
+      helpText.textContent = 'Total operations across all threads';
+      iterationsInput.value = 1000;
+      break;
+  }
+});
+</script>
+
+<style>
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.progress {
+  border-radius: 5px;
+}
+</style>

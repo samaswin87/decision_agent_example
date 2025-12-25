@@ -1,0 +1,46 @@
+<div class="card">
+  <h2>Custom Rule Evaluator</h2>
+  <p>Select a rule and provide context data in JSON format to evaluate.</p>
+
+  <%= form_with url: demo_custom_evaluate_path, method: :post, local: true do |f| %>
+    <div class="form-group">
+      <%= label_tag :rule_id, "Select Rule" %>
+      <%= select_tag :rule_id, options_from_collection_for_select(@rules, :rule_id, :rule_id, params[:rule_id]), include_blank: "Choose a rule...", class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag :context, "Context (JSON)" %>
+      <%= text_area_tag :context, params[:context] || '{"credit_score": 720, "annual_income": 65000, "debt_to_income_ratio": 0.35}', rows: 8, class: "form-control", style: "font-family: monospace;" %>
+      <small style="color: #666;">Enter valid JSON object with the facts for this rule to evaluate.</small>
+    </div>
+
+    <button type="submit">Evaluate</button>
+  <% end %>
+
+  <% if @result %>
+    <div class="result <%= @result[:error] ? 'error' : 'success' %>">
+      <h3>Evaluation Result</h3>
+
+      <% if @result[:error] %>
+        <p style="color: #e74c3c;"><strong>Error:</strong> <%= @result[:error] %></p>
+      <% else %>
+        <p><strong>Decision:</strong> <%= @result[:decision] || 'No match' %></p>
+        <p><strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%</p>
+
+        <% if @result[:explanations].present? %>
+          <h4 style="margin-top: 15px;">Explanations:</h4>
+          <ul class="explanations" style="list-style: none; padding: 0;">
+            <% @result[:explanations].each do |explanation| %>
+              <li style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px;"><%= explanation %></li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <details style="margin-top: 20px;">
+          <summary style="cursor: pointer; font-weight: bold;">Full Result (JSON)</summary>
+          <pre><%= JSON.pretty_generate(@result) %></pre>
+        </details>
+      <% end %>
+    </div>
+  <% end %>
+</div>

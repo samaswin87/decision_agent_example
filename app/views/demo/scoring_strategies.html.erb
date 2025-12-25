@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scoring Strategies</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .strategies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .strategy-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .strategy-card h3 { color: #667eea; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Scoring Strategies</h1>
+      <p>Test different decision scoring algorithms</p>
+      <a href="/demo/test_center" style="color: #667eea;">← Back</a>
+    </div>
+
+    <div class="strategies-grid">
+      <% @strategies.each do |strategy| %>
+        <div class="strategy-card">
+          <h3><%= strategy[:name] %></h3>
+          <p><%= strategy[:description] %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>
