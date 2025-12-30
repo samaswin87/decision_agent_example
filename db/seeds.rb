@@ -58,6 +58,26 @@ puts "\n9️⃣  Setting up Multi-Stage Workflow..."
 MultiStageWorkflowUseCase.setup_rules
 puts "   ✅ Multi-Stage Workflow rules created"
 
+# 10. Pundit Adapter Use Case
+puts "\n🔟 Setting up Pundit Adapter..."
+PunditAdapterUseCase.setup_rules
+puts "   ✅ Pundit Adapter rules created"
+
+# 11. Devise + CanCanCan Adapter Use Case
+puts "\n1️⃣1️⃣  Setting up Devise + CanCanCan Adapter..."
+DeviseCancancanAdapterUseCase.setup_rules
+puts "   ✅ Devise + CanCanCan Adapter rules created"
+
+# 12. Default Adapter Use Case
+puts "\n1️⃣2️⃣  Setting up Default Adapter..."
+DefaultAdapterUseCase.setup_rules
+puts "   ✅ Default Adapter rules created"
+
+# 13. Custom Adapter Use Case
+puts "\n1️⃣3️⃣  Setting up Custom Adapter..."
+CustomAdapterUseCase.setup_rules
+puts "   ✅ Custom Adapter rules created"
+
 # Summary
 puts "\n" + "="*80
 puts "SUMMARY"

@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_20_133845) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_30_012553) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "rule_versions", force: :cascade do |t|
     t.string "rule_id", null: false
     t.integer "version_number", null: false
@@ -33,6 +36,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_20_133845) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["rule_id"], name: "index_rules_on_rule_id", unique: true
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email"
+    t.string "password_digest"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
 end

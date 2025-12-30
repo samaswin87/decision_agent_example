@@ -2,6 +2,29 @@
   <h2>Welcome to DecisionAgent Example Application</h2>
   <p>This application demonstrates the <strong>decision_agent</strong> gem with thread-safety, versioning, and real-world use cases.</p>
 
+  <!-- Role Selector & Permissions Info -->
+  <div style="background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+      <div>
+        <h3 style="margin: 0 0 10px 0; font-size: 1.3em;">🔐 Role-Based Access Control (RBAC)</h3>
+        <p style="margin: 0; opacity: 0.95;">
+          <strong>Current Role:</strong> <%= @current_role&.capitalize || 'Viewer' %>
+          <% if RbacUseCase::ROLES[@current_role] %>
+            - <%= RbacUseCase::ROLES[@current_role][:description] %>
+          <% end %>
+        </p>
+        <p style="margin: 5px 0 0 0; font-size: 0.9em; opacity: 0.85;">
+          Access to features is controlled by your role. Change your role to test different permission levels.
+        </p>
+      </div>
+      <div style="margin-top: 10px;">
+        <a href="/demo/role_selector" style="display: inline-block; background: white; color: #1976d2; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: transform 0.3s; box-shadow: 0 3px 10px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          Change Role →
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- NEW: Test Center Highlight -->
   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">
     <h2 style="margin-bottom: 15px; font-size: 2em;">🧪 New: Comprehensive Test Center</h2>
@@ -83,6 +106,35 @@
     </div>
   </div>
 
+  <h3 style="margin-top: 40px; margin-bottom: 15px;">🔌 Authorization Adapters (NEW!)</h3>
+  <p style="margin-bottom: 20px; color: #666;">Examples demonstrating how to integrate DecisionAgent with popular authentication and authorization libraries.</p>
+
+  <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card" style="border-left: 4px solid #8e44ad; background: linear-gradient(135deg, #f9f5ff 0%, #ffffff 100%);">
+      <h3 style="color: #8e44ad; margin-bottom: 10px;">🔐 Pundit Adapter</h3>
+      <p style="margin-bottom: 15px;">Integrate DecisionAgent with Pundit authorization. See how Pundit policies use DecisionAgent rules for access control.</p>
+      <a href="/demo/pundit_adapter" class="btn" style="text-decoration: none; background: #8e44ad; color: white;">Test Adapter →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #16a085; background: linear-gradient(135deg, #e8f8f5 0%, #ffffff 100%);">
+      <h3 style="color: #16a085; margin-bottom: 10px;">🔑 Devise + CanCanCan</h3>
+      <p style="margin-bottom: 15px;">Combine Devise authentication with CanCanCan authorization using DecisionAgent rules for ability checks.</p>
+      <a href="/demo/devise_cancancan_adapter" class="btn" style="text-decoration: none; background: #16a085; color: white;">Test Adapter →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #2980b9; background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);">
+      <h3 style="color: #2980b9; margin-bottom: 10px;">⚙️ Default Adapter</h3>
+      <p style="margin-bottom: 15px;">Use DecisionAgent's built-in RBAC adapter without external dependencies. Simple and straightforward.</p>
+      <a href="/demo/default_adapter" class="btn" style="text-decoration: none; background: #2980b9; color: white;">Test Adapter →</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #e74c3c; background: linear-gradient(135deg, #fdeaea 0%, #ffffff 100%);">
+      <h3 style="color: #e74c3c; margin-bottom: 10px;">🛠️ Custom Adapter</h3>
+      <p style="margin-bottom: 15px;">Build your own custom adapter with security clearance, team membership, and custom permissions.</p>
+      <a href="/demo/custom_adapter" class="btn" style="text-decoration: none; background: #e74c3c; color: white;">Test Adapter →</a>
+    </div>
+  </div>
+
   <h3 style="margin-top: 40px; margin-bottom: 15px;">⚡ Command-Line Tools</h3>
   <div class="card" style="background: #2c3e50; color: white; padding: 20px;">
     <h4 style="margin-bottom: 15px;">Available Rake Tasks:</h4>
@@ -115,5 +167,14 @@ rake load_test:endurance[10]            # 10-minute endurance test</code></pre>
     <li style="padding: 10px; background: #f8f9fa; margin-bottom: 5px; border-radius: 4px;">✓ 9 real-world use case examples</li>
     <li style="padding: 10px; background: #e6e9ff; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #667eea;"><strong>NEW:</strong> A/B Testing with statistical analysis</li>
     <li style="padding: 10px; background: #f9f5ff; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #764ba2;"><strong>NEW:</strong> Persistent database monitoring</li>
+    <li style="padding: 10px; background: #e3f2fd; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #1976d2;"><strong>NEW:</strong> Role-Based Access Control (RBAC) with permission testing</li>
   </ul>
+
+  <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+    <h3 style="margin-top: 0; color: #856404;">⚠️ Permission Notice</h3>
+    <p style="color: #856404; margin-bottom: 0;">
+      The DecisionAgent Web UI at <code>/decision_agent</code> and various features now require appropriate permissions based on your role. 
+      Use the role selector above to test different permission levels. Default role is <strong>viewer</strong> (limited access).
+    </p>
+  </div>
 </div>

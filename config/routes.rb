@@ -1,5 +1,13 @@
+require 'decision_agent/web/server'
+
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # Mount DecisionAgent Web UI with permission middleware
+  # This provides visual rule builder, batch testing UI, authentication UI, and more
+  # Visit http://localhost:3000/decision_agent to access
+  # Access is controlled by RBAC permissions - users need appropriate role
+  mount PermissionMiddleware.new(DecisionAgent::Web::Server), at: '/decision_agent'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -113,4 +121,24 @@ Rails.application.routes.draw do
   get "demo/historical_data/:time_range", to: "demo#historical_data"
   post "demo/cleanup_metrics", to: "demo#cleanup_metrics"
   get "demo/custom_query/:query_type", to: "demo#custom_query"
+
+  # NEW: RBAC Testing
+  get "demo/rbac_batch_testing", to: "demo#rbac_batch_testing"
+  post "demo/rbac_batch_test", to: "demo#rbac_batch_test"
+  post "demo/rbac_single_test", to: "demo#rbac_single_test"
+  get "demo/rbac_roles_info", to: "demo#rbac_roles_info"
+
+  # Role Management (for testing permissions)
+  get "demo/role_selector", to: "demo#role_selector"
+  post "demo/set_role", to: "demo#set_role"
+
+  # Adapter Examples
+  get "demo/pundit_adapter", to: "demo#pundit_adapter"
+  post "demo/pundit_adapter", to: "demo#pundit_adapter"
+  get "demo/devise_cancancan_adapter", to: "demo#devise_cancancan_adapter"
+  post "demo/devise_cancancan_adapter", to: "demo#devise_cancancan_adapter"
+  get "demo/default_adapter", to: "demo#default_adapter"
+  post "demo/default_adapter", to: "demo#default_adapter"
+  get "demo/custom_adapter", to: "demo#custom_adapter"
+  post "demo/custom_adapter", to: "demo#custom_adapter"
 end

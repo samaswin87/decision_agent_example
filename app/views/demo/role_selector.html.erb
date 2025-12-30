@@ -1,0 +1,61 @@
+<div class="container" style="max-width: 800px; margin: 50px auto; padding: 20px;">
+  <h1>Role Selector</h1>
+  <p>Select a role to test permissions in the DecisionAgent application.</p>
+  
+  <div class="current-role" style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h3>Current Role: <strong><%= @current_role %></strong></h3>
+    <% if RbacUseCase::ROLES[@current_role] %>
+      <p><%= RbacUseCase::ROLES[@current_role][:description] %></p>
+      <p><strong>Permissions:</strong> <%= RbacUseCase::ROLES[@current_role][:permissions].join(', ') %></p>
+    <% end %>
+  </div>
+
+  <div class="role-selector-form" style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+    <h3>Change Role</h3>
+    <%= form_with url: "/demo/set_role", method: :post, local: true do |f| %>
+      <div style="margin: 15px 0;">
+        <%= f.label :role, "Select Role:", style: "display: block; margin-bottom: 5px;" %>
+        <%= f.select :role, options_for_select((@available_roles || []).map { |r| [RbacUseCase::ROLES[r][:name], r] }, @current_role), {}, { style: "width: 100%; padding: 10px; font-size: 16px;" } %>
+      </div>
+      <%= f.submit "Set Role", class: "btn btn-primary", style: "padding: 10px 20px; font-size: 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;" %>
+    <% end %>
+  </div>
+
+  <div class="roles-info" style="margin-top: 30px;">
+    <h3>Available Roles</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+      <thead>
+        <tr style="background: #f0f0f0;">
+          <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Role</th>
+          <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Description</th>
+          <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Permissions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% RbacUseCase::ROLES.each do |role_key, role_info| %>
+          <tr style="<%= 'background: #e8f5e9;' if role_key == @current_role %>">
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong><%= role_info[:name] %></strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd;"><%= role_info[:description] %></td>
+            <td style="padding: 10px; border: 1px solid #ddd;"><%= role_info[:permissions].join(', ') %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions" style="margin-top: 30px;">
+    <h3>Test Permissions</h3>
+    <p>Try accessing these features with different roles:</p>
+    <ul style="text-align: left; display: inline-block;">
+      <li><a href="/decision_agent">DecisionAgent Web UI</a> - Requires 'view' permission</li>
+      <li><a href="/demo/rules">View Rules</a> - Requires 'view' permission</li>
+      <li><a href="/demo/batch_testing">Batch Testing</a> - Requires 'batch' permission</li>
+      <li><a href="/demo/export_results">Export Results</a> - Requires 'export' permission</li>
+    </ul>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <a href="/" class="btn" style="padding: 10px 20px; background: #666; color: white; text-decoration: none; border-radius: 4px;">← Back to Home</a>
+  </div>
+</div>
+

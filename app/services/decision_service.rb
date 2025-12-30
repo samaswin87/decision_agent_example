@@ -32,7 +32,14 @@ class DecisionService
   end
 
   # Evaluate rules with thread-safe caching
-  def evaluate(rule_id:, context:, version: nil)
+  # version can be either version_number (Integer) or version_id (Integer, database ID)
+  def evaluate(rule_id:, context:, version: nil, version_id: nil)
+    # If version_id is provided, convert it to version_number
+    if version_id
+      version_record = RuleVersion.find_by(id: version_id, rule_id: rule_id)
+      version = version_record&.version_number if version_record
+    end
+
     agent = get_cached_agent(rule_id, version)
 
     return { error: "Rule not found: #{rule_id}" } unless agent
@@ -141,6 +148,18 @@ class DecisionService
     end
   end
 
+  # Get version manager instance
+  def version_manager
+    @version_manager ||= DecisionAgent::Versioning::VersionManager.new(
+      adapter: DecisionAgent::Versioning::ActiveRecordAdapter.new
+    )
+  end
+
+  # Compare two versions
+  def compare_versions(rule_id, version1, version2)
+    version_manager.compare_versions(rule_id: rule_id, version1: version1, version2: version2)
+  end
+
   private
 
   # Get or create cached agent instance
@@ -157,12 +176,30 @@ class DecisionService
   end
 
   def load_rules_from_db(rule_id, version)
-    if version
+    content = if version
       rule_version = RuleVersion.find_by(rule_id: rule_id, version_number: version)
       rule_version&.parsed_content
     else
       rule = Rule.find_by(rule_id: rule_id)
       rule&.active_version&.parsed_content
+    end
+    
+    # Convert symbol keys to string keys for JsonRuleEvaluator compatibility
+    content ? deep_stringify_keys(content) : nil
+  end
+
+  # Recursively convert symbol keys to string keys
+  def deep_stringify_keys(obj)
+    case obj
+    when Hash
+      obj.each_with_object({}) do |(key, value), result|
+        string_key = key.is_a?(Symbol) ? key.to_s : key
+        result[string_key] = deep_stringify_keys(value)
+      end
+    when Array
+      obj.map { |item| deep_stringify_keys(item) }
+    else
+      obj
     end
   end
 

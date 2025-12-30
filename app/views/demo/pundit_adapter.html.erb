@@ -1,0 +1,82 @@
+<div style="margin-bottom: 15px;">
+  <a href="/demo/all_use_cases" style="color: #3498db; text-decoration: none;">← Back to All Use Cases</a>
+</div>
+
+<div class="card">
+  <h2>Pundit Adapter Example</h2>
+  <p>This example demonstrates how to integrate DecisionAgent with Pundit authorization library.</p>
+  <p>The example simulates Pundit policies that use DecisionAgent rules for authorization decisions.</p>
+
+  <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+    <strong>💡 How to Test:</strong> Click the button below to run a simulation that demonstrates how Pundit policies use DecisionAgent rules to make authorization decisions.
+  </div>
+
+  <%= form_with url: demo_pundit_adapter_path, method: :post, local: true do |f| %>
+    <button type="submit" style="background: #8e44ad; padding: 12px 30px; font-size: 16px; font-weight: bold;">🧪 Run Pundit Adapter Simulation</button>
+  <% end %>
+
+  <% if @results %>
+    <div class="result" style="margin-top: 20px;">
+      <h3>Simulation Results</h3>
+      <p>The following table shows how Pundit policies use DecisionAgent rules to make authorization decisions:</p>
+      
+      <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white;">
+        <thead>
+          <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+            <th style="padding: 12px; text-align: left; font-weight: 600;">User</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600;">Role</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600;">Resource</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600;">Action</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600;">Allowed</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600;">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @results.each do |result| %>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+              <td style="padding: 12px;"><%= result[:user] %></td>
+              <td style="padding: 12px;"><span class="badge" style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;"><%= result[:role] %></span></td>
+              <td style="padding: 12px;"><%= result[:resource] %></td>
+              <td style="padding: 12px;"><code style="background: #f8f9fa; padding: 2px 6px; border-radius: 3px;"><%= result[:action] %></code></td>
+              <td style="padding: 12px;">
+                <span class="badge" style="background: <%= result[:allowed] ? '#27ae60' : '#e74c3c' %>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                  <%= result[:allowed] ? '✓ Allowed' : '✗ Denied' %>
+                </span>
+              </td>
+              <td style="padding: 12px;">
+                <% if result[:is_owner] %>
+                  <small style="background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px; margin-right: 5px;">Owner</small>
+                <% end %>
+                <% if result[:visibility] %>
+                  <small style="background: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 3px; margin-right: 5px;"><%= result[:visibility] %></small>
+                <% end %>
+                <% if result[:cross_organization] %>
+                  <small style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 3px;">Cross-org</small>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>
+
+<div class="card" style="background: #f8f9fa;">
+  <h3>How It Works</h3>
+  <ul>
+    <li><strong>Pundit Policies:</strong> The example includes a <code>ResourcePolicy</code> class that uses DecisionAgent rules</li>
+    <li><strong>Authorization Checks:</strong> Policy methods like <code>show?</code>, <code>update?</code> call DecisionAgent to evaluate permissions</li>
+    <li><strong>Context Building:</strong> User and resource attributes are mapped to DecisionAgent context</li>
+    <li><strong>Rule-Based Decisions:</strong> DecisionAgent rules determine if actions are allowed based on roles, ownership, and organization membership</li>
+  </ul>
+  
+  <h4 style="margin-top: 15px;">Key Features:</h4>
+  <ul>
+    <li>Admin has full access to all resources</li>
+    <li>Managers can access resources in their organization</li>
+    <li>Members can access their own resources</li>
+    <li>Members can view public resources in their organization</li>
+  </ul>
+</div>
+

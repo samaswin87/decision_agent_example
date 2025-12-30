@@ -104,12 +104,58 @@
                 <li>Risk-based escalation</li>
                 <li>Workflow simulation</li>
               </ul>
+
+            <% when 'pundit_adapter' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Pundit policy integration</li>
+                <li>Role-based access control</li>
+                <li>Organization-based permissions</li>
+                <li>Resource ownership checks</li>
+                <li>Interactive simulation</li>
+              </ul>
+
+            <% when 'devise_cancancan_adapter' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Devise authentication integration</li>
+                <li>CanCanCan ability checks</li>
+                <li>User confirmation status</li>
+                <li>Resource ownership</li>
+                <li>Published resource access</li>
+              </ul>
+
+            <% when 'default_adapter' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Built-in RBAC system</li>
+                <li>No external dependencies</li>
+                <li>Simple authorization API</li>
+                <li>Role-based permissions</li>
+                <li>Easy to configure</li>
+              </ul>
+
+            <% when 'custom_adapter' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Custom user attributes</li>
+                <li>Security clearance levels</li>
+                <li>Team-based collaboration</li>
+                <li>Department-based access</li>
+                <li>Custom permission system</li>
+              </ul>
             <% end %>
 
             <div class="mt-3">
-              <button class="btn btn-primary btn-sm" onclick="testUseCase('<%= use_case[:id] %>')">
-                🧪 Quick Test
-              </button>
+              <% if ['pundit_adapter', 'devise_cancancan_adapter', 'default_adapter', 'custom_adapter'].include?(use_case[:id]) %>
+                <a href="<%= url_for(action: use_case[:id], controller: 'demo') %>" class="btn btn-primary btn-sm">
+                  🧪 Test Adapter
+                </a>
+              <% else %>
+                <button class="btn btn-primary btn-sm" onclick="testUseCase('<%= use_case[:id] %>')">
+                  🧪 Quick Test
+                </button>
+              <% end %>
             </div>
           </div>
         </div>

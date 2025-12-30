@@ -16,9 +16,28 @@ threads min_threads_count, max_threads_count
 # the concurrency of the application would be max `threads` * `workers`.
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes).
+#
+# Note: On macOS, forking with multiple workers can cause Objective-C runtime
+# issues. Workers are disabled in development on macOS by default.
+# Set WEB_CONCURRENCY environment variable to override.
 require "concurrent-ruby"
-worker_count = Integer(ENV.fetch("WEB_CONCURRENCY") { Concurrent.physical_processor_count })
-workers worker_count if worker_count > 1
+
+# Check if we're on macOS and in development
+on_macos = RUBY_PLATFORM.include?('darwin')
+in_development = ENV.fetch("RAILS_ENV", "development") == "development"
+
+if ENV["WEB_CONCURRENCY"]
+  # Explicitly set via environment variable
+  worker_count = Integer(ENV["WEB_CONCURRENCY"])
+  workers worker_count if worker_count > 1
+elsif on_macos && in_development
+  # Disable workers on macOS in development to avoid fork() issues
+  workers 0
+else
+  # Use default behavior for other platforms/environments
+  worker_count = Concurrent.physical_processor_count
+  workers worker_count if worker_count > 1
+end
 
 # Preload the application before starting the workers. This can improve startup time.
 preload_app!

@@ -8,10 +8,16 @@ Rails.application.config.to_prepare do
   #   config.logger = Rails.logger
   # end
 
+  # Configure RBAC (Role-Based Access Control)
+  # Using default built-in RBAC system
+  # You can also configure custom adapters for Devise, CanCanCan, Pundit, etc.
+  # See docs/RBAC_CONFIGURATION.md for more options
+  DecisionAgent.configure_rbac(:default)
+
   # Ensure singleton service is initialized
   DecisionService.instance
 
-  Rails.logger.info "DecisionAgent initialized successfully"
+  Rails.logger.info "DecisionAgent initialized successfully with RBAC"
 end
 
 # Thread-safe initialization for multi-threaded environments (Puma, Sidekiq)

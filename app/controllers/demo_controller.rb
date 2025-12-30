@@ -16,6 +16,7 @@ class DemoController < ApplicationController
 
   def index
     @rulesets = Rule.select(:ruleset).distinct.pluck(:ruleset)
+    @current_role = current_user_role
   end
 
   def loan_approval
@@ -87,6 +88,22 @@ class DemoController < ApplicationController
   end
 
   def rules
+    begin
+      require_permission!(action: 'view', resource_type: 'public')
+    rescue DecisionAgent::InvalidRuleDslError => e
+      # If there's a rule validation error, try to fix it by resetting RBAC rules
+      Rails.logger.error("Rule validation error in rules action: #{e.message}")
+      begin
+        RbacUseCase.setup_rules
+        DecisionService.instance.clear_cache
+        retry
+      rescue => retry_error
+        Rails.logger.error("Failed to fix rule validation error: #{retry_error.message}")
+        flash[:alert] = "Rule validation error: #{e.message}. Please contact an administrator."
+        redirect_to root_path
+        return
+      end
+    end
     @rules = Rule.includes(:rule_versions).order(:rule_id)
   end
 
@@ -222,7 +239,11 @@ class DemoController < ApplicationController
       { id: 'recommendation_engine', name: 'Recommendation Engine', description: 'Personalized content recommendations' },
       { id: 'multi_stage_workflow', name: 'Multi-Stage Workflow', description: 'Complex approval workflow' },
       { id: 'ui_dashboard', name: 'UI Dashboard (NEW)', description: 'Real-time UI feedback and progress tracking' },
-      { id: 'monitoring', name: 'Monitoring & Observability (NEW)', description: 'Comprehensive monitoring and performance tracking' }
+      { id: 'monitoring', name: 'Monitoring & Observability (NEW)', description: 'Comprehensive monitoring and performance tracking' },
+      { id: 'pundit_adapter', name: 'Pundit Adapter', description: 'Integration with Pundit authorization library' },
+      { id: 'devise_cancancan_adapter', name: 'Devise + CanCanCan Adapter', description: 'Integration with Devise authentication and CanCanCan authorization' },
+      { id: 'default_adapter', name: 'Default Adapter', description: 'Default DecisionAgent RBAC adapter' },
+      { id: 'custom_adapter', name: 'Custom Adapter', description: 'Custom adapter implementation example' }
     ]
   end
 
@@ -582,6 +603,10 @@ class DemoController < ApplicationController
     when 'content_moderation' then 'content_severe_violations'
     when 'dynamic_pricing' then 'pricing_surge'
     when 'recommendation_engine' then 'recommendation_highly_personalized'
+    when 'pundit_adapter' then 'pundit_adapter_example'
+    when 'devise_cancancan_adapter' then 'devise_cancancan_adapter_example'
+    when 'default_adapter' then 'default_adapter_example'
+    when 'custom_adapter' then 'custom_adapter_example'
     else 'simple_loan_approval'
     end
   end
@@ -752,9 +777,12 @@ class DemoController < ApplicationController
 
   def batch_testing
     # Batch testing UI
+    # Note: For Excel import support, progress tracking, and checkpoint/resume features,
+    # use the DecisionAgent Web Server at /decision_agent/testing/batch
   end
 
   def run_batch_tests
+    require_permission!(action: 'batch', resource_type: 'public')
     use_case = params[:use_case] || 'simple_loan'
     batch_size = params[:batch_size]&.to_i || 100
     parallel = params[:parallel] == 'true'
@@ -888,6 +916,7 @@ class DemoController < ApplicationController
   end
 
   def create_rule_version
+    require_permission!(action: 'edit', resource_type: 'public')
     rule_id = params[:rule_id]
     content = params[:content]
     created_by = params[:created_by] || 'demo_user'
@@ -907,6 +936,7 @@ class DemoController < ApplicationController
   end
 
   def activate_rule_version
+    require_permission!(action: 'approve', resource_type: 'public')
     rule_id = params[:rule_id]
     version_number = params[:version_number]&.to_i
 
@@ -1096,6 +1126,7 @@ class DemoController < ApplicationController
   end
 
   def export_results
+    require_permission!(action: 'export', resource_type: 'public')
     results = {
       exported_at: Time.current,
       use_cases: all_use_cases_list.length,
@@ -1128,129 +1159,214 @@ class DemoController < ApplicationController
       { id: 'recommendation_engine', name: 'Recommendation Engine', description: 'Personalized content recommendations' },
       { id: 'multi_stage_workflow', name: 'Multi-Stage Workflow', description: 'Complex approval workflow' },
       { id: 'ui_dashboard', name: 'UI Dashboard', description: 'Real-time UI feedback and progress tracking' },
-      { id: 'monitoring', name: 'Monitoring & Observability', description: 'Comprehensive monitoring and performance tracking' }
+      { id: 'monitoring', name: 'Monitoring & Observability', description: 'Comprehensive monitoring and performance tracking' },
+      { id: 'pundit_adapter', name: 'Pundit Adapter', description: 'Integration with Pundit authorization library' },
+      { id: 'devise_cancancan_adapter', name: 'Devise + CanCanCan Adapter', description: 'Integration with Devise authentication and CanCanCan authorization' },
+      { id: 'default_adapter', name: 'Default Adapter', description: 'Default DecisionAgent RBAC adapter' },
+      { id: 'custom_adapter', name: 'Custom Adapter', description: 'Custom adapter implementation example' }
     ]
+  end
+
+  # Adapter Examples Actions
+  def pundit_adapter
+    @results = nil
+    if request.post?
+      @results = PunditAdapterUseCase.simulate_pundit_checks
+    end
+  end
+
+  def devise_cancancan_adapter
+    @results = nil
+    if request.post?
+      @results = DeviseCancancanAdapterUseCase.simulate_cancancan_checks
+    end
+  end
+
+  def default_adapter
+    @results = nil
+    if request.post?
+      @results = DefaultAdapterUseCase.simulate_default_adapter
+    end
+  end
+
+  def custom_adapter
+    @results = []
+    if request.post?
+      begin
+        results = CustomAdapterUseCase.simulate_custom_adapter
+        @results = results.is_a?(Array) ? results : [results]
+        Rails.logger.info("Custom adapter results count: #{@results.length}")
+        Rails.logger.debug("Custom adapter results: #{@results.inspect}")
+      rescue => e
+        Rails.logger.error("Error in custom_adapter: #{e.message}")
+        Rails.logger.error(e.backtrace.join("\n"))
+        @results = [{ 
+          user: 'System', 
+          action: 'error', 
+          resource: 'simulation', 
+          error: "Error running simulation: #{e.message}",
+          can: false
+        }]
+      end
+    end
   end
 
   # NEW: A/B Testing Actions
   def ab_testing
-    # Render the A/B testing UI page
+    @service = ABTestingService.instance
+    @active_tests = @service.list_tests(status: 'running')
+    @all_tests = @service.list_tests
+    @rules = Rule.includes(:rule_versions).order(:rule_id)
   end
 
   def create_ab_test
-    # In a real implementation, this would create a test using DecisionAgent::ABTesting::ABTestManager
-    # For now, return mock response
-    render json: {
-      success: true,
-      test_id: "test_#{SecureRandom.hex(4)}",
-      message: "A/B test created successfully"
-    }
+    service = ABTestingService.instance
+    
+    begin
+      test = service.create_test(
+        name: params[:name],
+        champion_version_id: params[:champion_version_id].to_i,
+        challenger_version_id: params[:challenger_version_id].to_i,
+        traffic_split: {
+          champion: params[:champion_traffic].to_i,
+          challenger: params[:challenger_traffic].to_i
+        }
+      )
+
+      render json: {
+        success: true,
+        test_id: test.id,
+        test: test.to_h,
+        message: "A/B test created successfully"
+      }
+    rescue => e
+      render json: {
+        success: false,
+        error: e.message
+      }, status: 422
+    end
   end
 
   def run_ab_test
-    # Simulate running an A/B test
+    service = ABTestingService.instance
     test_id = params[:test_id]
-    user_count = params[:user_count].to_i
-    scenario = params[:scenario]
+    user_count = params[:user_count]&.to_i || 100
+    rule_id = params[:rule_id] || 'simple_loan_approval'
 
-    # Mock results
-    render json: {
-      test_id: test_id,
-      processed: user_count,
-      champion_stats: {
-        assignments: (user_count * 0.9).to_i,
-        approvals: (user_count * 0.9 * 0.45).to_i
-      },
-      challenger_stats: {
-        assignments: (user_count * 0.1).to_i,
-        approvals: (user_count * 0.1 * 0.68).to_i
-      }
-    }
+    # Generate test contexts
+    contexts = user_count.times.map do |i|
+      generate_random_context('simple_loan').merge(user_id: "user_#{i}")
+    end
+
+    begin
+      result = service.run_test(
+        test_id: test_id,
+        contexts: contexts,
+        rule_id: rule_id
+      )
+
+      render json: result
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
   end
 
   def ab_test_results
+    service = ABTestingService.instance
     test_id = params[:test_id]
 
-    # Mock test results
-    render json: {
-      test_id: test_id,
-      champion: { approvals: 405, reviews: 495, avg_confidence: 0.82 },
-      challenger: { approvals: 68, reviews: 32, avg_confidence: 0.79 }
-    }
+    begin
+      results = service.get_results(test_id)
+      render json: results
+    rescue => e
+      render json: { error: e.message }, status: 404
+    end
   end
 
   def complete_ab_test
+    service = ABTestingService.instance
     test_id = params[:test_id]
 
-    render json: {
-      success: true,
-      message: "Test #{test_id} marked as completed"
-    }
+    begin
+      service.complete_test(test_id)
+      render json: {
+        success: true,
+        message: "Test #{test_id} marked as completed"
+      }
+    rescue => e
+      render json: {
+        success: false,
+        error: e.message
+      }, status: 422
+    end
   end
 
   # NEW: Persistent Monitoring Actions
   def persistent_monitoring
-    # Render the persistent monitoring UI page
+    @service = PersistentMonitoringService.instance
+    @stats = @service.database_stats
   end
 
   def record_persistent_decisions
-    count = params[:count].to_i
-    use_case = params[:use_case]
+    service = PersistentMonitoringService.instance
+    count = params[:count]&.to_i || 100
+    use_case = params[:use_case] || 'simple_loan'
 
-    # Simulate recording decisions to database
-    # In real implementation, use DecisionAgent::Monitoring::MetricsCollector with database storage
+    setup_use_case(use_case)
+    recorded = 0
+
+    count.times do
+      context = generate_random_context(use_case)
+      result = evaluate_use_case(use_case, context)
+      
+      service.record_decision(result, context)
+      recorded += 1
+    end
 
     render json: {
       success: true,
-      recorded: count,
+      recorded: recorded,
       use_case: use_case,
-      message: "#{count} decisions recorded to database"
+      message: "#{recorded} decisions recorded"
     }
+  rescue => e
+    render json: {
+      success: false,
+      error: e.message
+    }, status: 500
   end
 
   def database_stats
-    # Mock database statistics
-    render json: {
-      total_decisions: rand(10000..15000),
-      total_evaluations: rand(20000..30000),
-      total_performance: rand(15000..22000),
-      total_errors: rand(10..60),
-      success_rate: (rand(90..99) / 100.0).round(3),
-      avg_confidence: (rand(75..85) / 100.0).round(3),
-      avg_duration: (rand(15..35)).round(2),
-      p95_latency: (rand(80..130)).round(2)
-    }
+    service = PersistentMonitoringService.instance
+    stats = service.database_stats
+
+    render json: stats
   end
 
   def historical_data
-    time_range = params[:time_range].to_i
+    service = PersistentMonitoringService.instance
+    time_range = params[:time_range]&.to_i || 3600
 
-    # Mock historical data
-    decisions = {
-      approved: rand(500..1300),
-      review: rand(200..500),
-      denied: rand(50..150)
-    }
+    data = service.historical_data(time_range: time_range)
 
-    render json: {
-      time_range: time_range,
-      decisions: decisions,
-      total: decisions.values.sum
-    }
+    render json: data
+  rescue => e
+    render json: { error: e.message }, status: 500
   end
 
   def cleanup_metrics
-    days = params[:days].to_i
+    service = PersistentMonitoringService.instance
+    days = params[:days]&.to_i || 30
+    older_than = days.days.to_i
 
-    # Mock cleanup
-    removed_count = rand(500..1500)
+    result = service.cleanup_metrics(older_than: older_than)
 
+    render json: result
+  rescue => e
     render json: {
-      success: true,
-      removed: removed_count,
-      days: days,
-      message: "Removed #{removed_count} metrics older than #{days} days"
-    }
+      success: false,
+      error: e.message
+    }, status: 500
   end
 
   def custom_query
@@ -1258,23 +1374,142 @@ class DemoController < ApplicationController
 
     result = case query_type
     when 'high_confidence'
-      { count: rand(5000..7000), description: 'Decisions with confidence ≥ 0.8' }
+      if defined?(DecisionLog)
+        count = DecisionLog.where('confidence >= ?', 0.8).count
+        { count: count, description: 'Decisions with confidence ≥ 0.8' }
+      else
+        { error: 'Database storage not enabled' }
+      end
     when 'recent_success'
-      { count: rand(800..1300), success_rate: (rand(95..99)).round(1) }
+      if defined?(DecisionLog)
+        recent = DecisionLog.where('created_at >= ?', 1.hour.ago)
+        count = recent.count
+        success_rate = count > 0 ? (recent.where(status: 'success').count.to_f / count * 100).round(1) : 0
+        { count: count, success_rate: success_rate }
+      else
+        { error: 'Database storage not enabled' }
+      end
     when 'avg_transaction_duration'
-      { avg_duration: (rand(120..180)).round(2), total_transactions: rand(10000..15000) }
+      if defined?(PerformanceMetric)
+        avg = PerformanceMetric.average(:duration_ms)&.to_f&.round(2) || 0.0
+        total = PerformanceMetric.count
+        { avg_duration: avg, total_transactions: total }
+      else
+        { error: 'Database storage not enabled' }
+      end
     when 'error_analysis'
-      {
-        errors: {
-          'ArgumentError' => rand(5..15),
-          'ValidationError' => rand(3..11),
-          'TimeoutError' => rand(2..7)
-        }
-      }
+      if defined?(ErrorMetric)
+        errors = ErrorMetric.group(:error_type).count
+        { errors: errors }
+      else
+        { error: 'Database storage not enabled' }
+      end
     else
       { error: 'Unknown query type' }
     end
 
     render json: result
+  rescue => e
+    render json: { error: e.message }, status: 500
+  end
+
+  # NEW: RBAC Testing Actions
+  def rbac_batch_testing
+    # UI view for RBAC batch testing
+    @roles = RbacUseCase::ROLES
+  end
+
+  def rbac_batch_test
+    batch_size = params[:batch_size]&.to_i || 100
+    parallel = params[:parallel] == 'true' || params[:parallel] == true
+    role_distribution = params[:role_distribution] || {}
+
+    # Ensure RBAC rules are set up
+    RbacUseCase.setup_rules
+
+    # Convert role distribution percentages to probabilities
+    distribution = {}
+    role_distribution.each do |role, prob|
+      distribution[role] = prob.to_f if prob.to_f > 0
+    end
+
+    # Generate test contexts
+    contexts = RbacUseCase.generate_test_contexts(
+      count: batch_size,
+      role_distribution: distribution.any? ? distribution : nil
+    )
+
+    # Run batch evaluation
+    result = RbacUseCase.evaluate_batch(contexts, parallel: parallel)
+
+    render json: result
+  rescue => e
+    Rails.logger.error("RBAC batch test failed: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    render json: { error: e.message }, status: 500
+  end
+
+  def rbac_single_test
+    # Ensure RBAC rules are set up
+    RbacUseCase.setup_rules
+
+    user_id = params[:user_id] || "user_#{rand(1000)}"
+    resource_owner = params[:resource_owner] || user_id
+
+    context = {
+      user_id: user_id,
+      user_role: params[:user_role] || 'viewer',
+      action: params[:action] || 'view',
+      resource_type: params[:resource_type] || 'public',
+      resource_owner: resource_owner,
+      is_own_resource: (user_id == resource_owner)
+    }
+
+    # Add amount for approval actions
+    if params[:action] == 'approve' && params[:amount]
+      context[:amount] = params[:amount].to_f
+    end
+
+    result = RbacUseCase.evaluate(context)
+
+    render json: result
+  rescue => e
+    render json: { error: e.message }, status: 500
+  end
+
+  def rbac_roles_info
+    render json: {
+      roles: RbacUseCase::ROLES,
+      available_actions: ['view', 'edit', 'delete', 'approve', 'export', 'batch'],
+      resource_types: ['public', 'shared', 'private', 'confidential']
+    }
+  end
+
+  # Role Management Actions (for testing permissions)
+  public
+
+  def role_selector
+    @current_role = current_user_role
+    # Access RbacUseCase::ROLES - Rails autoloading will handle loading the class
+    # Explicitly reference the constant to trigger autoload if needed
+    roles = RbacUseCase::ROLES
+    @available_roles = roles.keys
+  rescue NameError, NoMethodError => e
+    Rails.logger.error("Error loading RbacUseCase::ROLES: #{e.message}")
+    Rails.logger.error(e.backtrace.first(5).join("\n"))
+    # Fallback: define roles directly if RbacUseCase isn't available
+    @available_roles = ['admin', 'manager', 'analyst', 'viewer', 'operator']
+  end
+
+  def set_role
+    role = params[:role]
+    if RbacUseCase::ROLES.key?(role)
+      set_user_role(role)
+      flash[:notice] = "Your role has been set to: #{RbacUseCase::ROLES[role][:name]}"
+    else
+      flash[:alert] = "Invalid role: #{role}"
+    end
+    
+    redirect_back(fallback_location: root_path)
   end
 end

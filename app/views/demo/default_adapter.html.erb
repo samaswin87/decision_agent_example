@@ -1,0 +1,83 @@
+<div style="margin-bottom: 15px;">
+  <a href="/demo/all_use_cases" style="color: #3498db; text-decoration: none;">← Back to All Use Cases</a>
+</div>
+
+<div class="card">
+  <h2>Default Adapter Example</h2>
+  <p>This example demonstrates the default DecisionAgent RBAC adapter configuration.</p>
+  <p>The default adapter works without external authentication/authorization libraries, using built-in DecisionAgent RBAC.</p>
+
+  <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #2980b9;">
+    <strong>💡 How to Test:</strong> Click the button below to run a simulation that demonstrates how the default adapter makes authorization decisions.
+  </div>
+
+  <%= form_with url: demo_default_adapter_path, method: :post, local: true do |f| %>
+    <button type="submit" style="background: #2980b9; padding: 12px 30px; font-size: 16px; font-weight: bold;">🧪 Run Default Adapter Simulation</button>
+  <% end %>
+
+  <% if @results %>
+    <div class="result" style="margin-top: 20px;">
+      <h3>Simulation Results</h3>
+      <p>The following table shows how the default adapter makes authorization decisions:</p>
+      
+      <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+          <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+            <th style="padding: 12px; text-align: left;">User Role</th>
+            <th style="padding: 12px; text-align: left;">Action</th>
+            <th style="padding: 12px; text-align: left;">Resource Type</th>
+            <th style="padding: 12px; text-align: left;">Can?</th>
+            <th style="padding: 12px; text-align: left;">Adapter</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @results.each do |result| %>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+              <td style="padding: 12px;"><span class="badge"><%= result[:user_role] %></span></td>
+              <td style="padding: 12px;"><%= result[:action] %></td>
+              <td style="padding: 12px;"><%= result[:resource_type] %></td>
+              <td style="padding: 12px;">
+                <span class="badge <%= result[:can] ? 'success' : 'error' %>">
+                  <%= result[:can] ? '✓ Yes' : '✗ No' %>
+                </span>
+              </td>
+              <td style="padding: 12px;"><small><%= result[:adapter] %></small></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <% if @results.any? { |r| r[:error] } %>
+        <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 4px;">
+          <h4>Authorization Exceptions:</h4>
+          <% @results.select { |r| r[:error] }.each do |result| %>
+            <p><strong><%= result[:user_role] %>:</strong> <%= result[:error] %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card" style="background: #f8f9fa;">
+  <h3>How It Works</h3>
+  <ul>
+    <li><strong>Default Authorizer:</strong> A simple <code>DefaultAuthorizer</code> class that uses DecisionAgent rules</li>
+    <li><strong>No External Dependencies:</strong> Works without Pundit, CanCanCan, or Devise</li>
+    <li><strong>Simple API:</strong> Methods like <code>can?</code> and <code>authorize!</code> for permission checks</li>
+    <li><strong>Rule-Based:</strong> All authorization decisions are made by DecisionAgent rules</li>
+  </ul>
+  
+  <h4 style="margin-top: 15px;">Key Features:</h4>
+  <ul>
+    <li>Admin has full access to all actions</li>
+    <li>Editors can manage content (view, edit, create)</li>
+    <li>Viewers can only read resources</li>
+    <li>Viewers cannot perform write operations (edit, create, delete)</li>
+  </ul>
+
+  <h4 style="margin-top: 15px;">Configuration:</h4>
+  <p>In <code>config/initializers/decision_agent.rb</code>:</p>
+  <pre style="background: white; padding: 10px; border-radius: 4px; overflow-x: auto;"><code>DecisionAgent.configure_rbac(:default)</code></pre>
+</div>
+

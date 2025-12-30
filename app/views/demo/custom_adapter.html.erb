@@ -1,0 +1,125 @@
+<div style="margin-bottom: 15px;">
+  <a href="/demo/all_use_cases" style="color: #3498db; text-decoration: none;">← Back to All Use Cases</a>
+</div>
+
+<div class="card">
+  <h2>Custom Adapter Example</h2>
+  <p>This example demonstrates how to create a custom adapter for DecisionAgent.</p>
+  <p>The example shows how to build a custom adapter that integrates with your own authentication/authorization system.</p>
+
+  <div style="background: #fdeaea; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #e74c3c;">
+    <strong>💡 How to Test:</strong> Click the button below to run a simulation that demonstrates how a custom adapter makes authorization decisions based on custom attributes like security clearance and team membership.
+  </div>
+
+  <%= form_with url: demo_custom_adapter_path, method: :post, local: true, html: { id: 'custom-adapter-form' } do |f| %>
+    <button type="submit" style="background: #e74c3c; padding: 12px 30px; font-size: 16px; font-weight: bold;">🧪 Run Custom Adapter Simulation</button>
+  <% end %>
+
+  <script>
+    // Scroll to results after form submission if results exist
+    <% if @results && @results.any? %>
+      document.addEventListener('DOMContentLoaded', function() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    <% end %>
+  </script>
+
+  <% if @results && @results.any? %>
+    <div id="results-section" style="margin-top: 20px; padding: 10px; background: #e8f5e9; border-radius: 5px;">
+      <strong>✓ Results loaded: <%= @results.length %> test cases</strong>
+    </div>
+    <div class="result" style="margin-top: 20px;">
+      <h3>Simulation Results</h3>
+      <p>The following table shows how the custom adapter makes authorization decisions based on custom attributes:</p>
+      
+      <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+          <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+            <th style="padding: 12px; text-align: left;">User</th>
+            <th style="padding: 12px; text-align: left;">Clearance</th>
+            <th style="padding: 12px; text-align: left;">Action</th>
+            <th style="padding: 12px; text-align: left;">Resource</th>
+            <th style="padding: 12px; text-align: left;">Classification</th>
+            <th style="padding: 12px; text-align: left;">Can?</th>
+            <th style="padding: 12px; text-align: left;">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @results.each do |result| %>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+              <td style="padding: 12px;"><%= result[:user] || result['user'] || 'N/A' %></td>
+              <td style="padding: 12px;">
+                <% clearance = result[:clearance] || result['clearance'] %>
+                <% if clearance %>
+                  <span class="badge <%= clearance >= 5 ? 'success' : 'warning' %>">
+                    Level <%= clearance %>
+                  </span>
+                <% else %>
+                  <span>N/A</span>
+                <% end %>
+              </td>
+              <td style="padding: 12px;"><%= result[:action] || result['action'] || 'N/A' %></td>
+              <td style="padding: 12px;"><%= result[:resource] || result['resource'] || 'N/A' %></td>
+              <td style="padding: 12px;"><%= result[:classification] || result['classification'] || 'N/A' %></td>
+              <td style="padding: 12px;">
+                <% can = result[:can] || result['can'] %>
+                <span class="badge <%= can ? 'success' : 'error' %>">
+                  <%= can ? '✓ Yes' : '✗ No' %>
+                </span>
+              </td>
+              <td style="padding: 12px;">
+                <% if result[:same_team] || result['same_team'] %>
+                  <small>Same team</small>
+                <% end %>
+                <% if result[:has_permission] || result['has_permission'] %>
+                  <small>Has permission</small>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <% if @results.any? { |r| r[:error] } %>
+        <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 4px;">
+          <h4>Authorization Exceptions:</h4>
+          <% @results.select { |r| r[:error] }.each do |result| %>
+            <p><strong><%= result[:user] %>:</strong> <%= result[:error] %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card" style="background: #f8f9fa;">
+  <h3>How It Works</h3>
+  <ul>
+    <li><strong>Custom User Model:</strong> Includes custom attributes like <code>security_clearance</code>, <code>department</code>, <code>permissions</code></li>
+    <li><strong>Custom Resource Model:</strong> Includes custom attributes like <code>classification</code>, <code>team_id</code></li>
+    <li><strong>Custom Adapter:</strong> The <code>CustomAdapter</code> class builds context from custom attributes</li>
+    <li><strong>Custom Rules:</strong> DecisionAgent rules evaluate based on custom attributes (clearance level, team membership, etc.)</li>
+  </ul>
+  
+  <h4 style="margin-top: 15px;">Key Features:</h4>
+  <ul>
+    <li>High clearance users (≥5) can access classified resources in their department</li>
+    <li>Team members can collaborate on team resources</li>
+    <li>Users with custom permissions can perform special actions</li>
+    <li>Public resources can be viewed by anyone</li>
+    <li>Low clearance users (<3) cannot access classified resources</li>
+  </ul>
+
+  <h4 style="margin-top: 15px;">Custom Attributes Used:</h4>
+  <ul>
+    <li><strong>Security Clearance:</strong> Numeric level (0-10) for access control</li>
+    <li><strong>Department:</strong> Organizational unit for resource access</li>
+    <li><strong>Team ID:</strong> Team membership for collaboration</li>
+    <li><strong>Custom Permissions:</strong> Array of permission strings</li>
+    <li><strong>Resource Classification:</strong> public, internal, classified</li>
+  </ul>
+</div>
+
