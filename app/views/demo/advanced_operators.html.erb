@@ -1,0 +1,788 @@
+<div class="card">
+  <h2>🆕 Advanced Operators Demo</h2>
+  <p>Test the new advanced operators added to DecisionAgent. Each example demonstrates real-world use cases with interactive testing.</p>
+
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin: 20px 0;">
+    <h3 style="margin-top: 0;">✨ New Operators Available</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
+      <div><strong>String:</strong> contains, starts_with, ends_with, matches</div>
+      <div><strong>Numeric:</strong> between, modulo, sqrt, abs, round, floor, ceil, sin, cos, tan, power, min, max</div>
+      <div><strong>Collections:</strong> contains_all, contains_any, intersects</div>
+      <div><strong>Statistics:</strong> sum, average, median, stddev, percentile, count</div>
+      <div><strong>Date/Time:</strong> before_date, after_date, within_days, day_of_week, duration_seconds, hour_of_day, day_of_month, month, year, week_of_year, subtract_days, add_hours, subtract_hours, add_minutes, subtract_minutes</div>
+      <div><strong>Moving Window:</strong> moving_sum, moving_max, moving_min, moving_average</div>
+      <div><strong>Geospatial:</strong> within_radius, in_polygon</div>
+      <div><strong>String Agg:</strong> length, join</div>
+    </div>
+  </div>
+
+  <!-- Performance Tips -->
+  <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 5px 15px rgba(240, 147, 251, 0.3);">
+    <h3 style="margin-top: 0;">⚡ Performance Best Practices</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 15px;">
+      <div style="background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px;">
+        <h4 style="margin-top: 0; margin-bottom: 8px;">📝 String Operations</h4>
+        <p style="margin: 0; font-size: 0.95em; opacity: 0.95;">
+          <code>contains</code>, <code>starts_with</code>, and <code>ends_with</code> are <strong>faster</strong> than <code>matches</code> (regex). Use regex only when pattern matching is necessary.
+        </p>
+      </div>
+      <div style="background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px;">
+        <h4 style="margin-top: 0; margin-bottom: 8px;">🌍 Geospatial</h4>
+        <p style="margin: 0; font-size: 0.95em; opacity: 0.95;">
+          Prefer <code>within_radius</code> for <strong>circular areas</strong>, <code>in_polygon</code> for <strong>irregular shapes</strong>. Radius checks are faster for simple distance calculations.
+        </p>
+      </div>
+      <div style="background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px;">
+        <h4 style="margin-top: 0; margin-bottom: 8px;">📦 Collections</h4>
+        <p style="margin: 0; font-size: 0.95em; opacity: 0.95;">
+          Use <code>contains_any</code> instead of multiple <code>eq</code> conditions in an <code>any</code> block. It's more efficient and readable.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- String Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #667eea; margin-top: 0;">📝 String Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>contains - Check if string contains substring</h4>
+      <p><strong>Use Case:</strong> Error detection in log messages</p>
+      <button onclick="testOperator('contains', {message: 'An error occurred in the system'})" class="btn" style="background: #667eea; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test contains</button>
+      <pre id="contains-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>starts_with - Check if string starts with prefix</h4>
+      <p><strong>Use Case:</strong> Error code routing</p>
+      <button onclick="testOperator('starts_with', {code: 'ERR_404'})" class="btn" style="background: #667eea; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test starts_with</button>
+      <pre id="starts_with-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>ends_with - Check if string ends with suffix</h4>
+      <p><strong>Use Case:</strong> File type detection</p>
+      <button onclick="testOperator('ends_with', {filename: 'document.pdf'})" class="btn" style="background: #667eea; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test ends_with</button>
+      <pre id="ends_with-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>matches - Regex pattern matching</h4>
+      <p><strong>Use Case:</strong> Email validation</p>
+      <p style="font-size: 0.9em; color: #e67e22; margin: 5px 0;"><strong>⚠️ Performance Tip:</strong> Use <code>contains</code>, <code>starts_with</code>, or <code>ends_with</code> when possible - they're faster than regex!</p>
+      <button onclick="testOperator('matches', {email: 'user@example.com'})" class="btn" style="background: #667eea; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test matches</button>
+      <pre id="matches-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Numeric Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #16a085; margin-top: 0;">🔢 Numeric Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>between - Check if value is in range</h4>
+      <p><strong>Use Case:</strong> Age verification (18-65)</p>
+      <button onclick="testOperator('between', {age: 30})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test between</button>
+      <pre id="between-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>modulo - Check remainder after division</h4>
+      <p><strong>Use Case:</strong> A/B testing distribution (even numbers)</p>
+      <button onclick="testOperator('modulo', {number: 10})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test modulo</button>
+      <pre id="modulo-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>sqrt - Square root calculation</h4>
+      <p><strong>Use Case:</strong> Mathematical calculations</p>
+      <button onclick="testOperator('sqrt', {number: 9})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test sqrt</button>
+      <pre id="sqrt-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>abs - Absolute value</h4>
+      <p><strong>Use Case:</strong> Distance calculations</p>
+      <button onclick="testOperator('abs', {value: -5})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test abs</button>
+      <pre id="abs-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>sin, cos, tan - Trigonometric functions</h4>
+      <p><strong>Use Case:</strong> Mathematical calculations</p>
+      <button onclick="testOperator('sin', {angle: 0})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test sin</button>
+      <button onclick="testOperator('cos', {angle: 0})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test cos</button>
+      <pre id="sin-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="cos-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>power - Power calculation (base^exponent)</h4>
+      <p><strong>Use Case:</strong> Mathematical operations</p>
+      <button onclick="testOperator('power', {base: 2})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test power</button>
+      <pre id="power-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>round, floor, ceil - Rounding functions</h4>
+      <p><strong>Use Case:</strong> Number formatting</p>
+      <button onclick="testOperator('round', {value: 3.4})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test round</button>
+      <button onclick="testOperator('floor', {value: 3.9})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test floor</button>
+      <button onclick="testOperator('ceil', {value: 3.1})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test ceil</button>
+      <pre id="round-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="floor-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="ceil-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>min, max - Minimum/Maximum from array</h4>
+      <p><strong>Use Case:</strong> Array aggregations</p>
+      <button onclick="testOperator('min', {numbers: [3, 1, 5, 2]})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test min</button>
+      <button onclick="testOperator('max', {numbers: [3, 1, 5, 2]})" class="btn" style="background: #16a085; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test max</button>
+      <pre id="min-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="max-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Collection Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #e67e22; margin-top: 0;">📦 Collection Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>contains_all - Check if array contains all elements</h4>
+      <p><strong>Use Case:</strong> Permission verification</p>
+      <button onclick="testOperator('contains_all', {permissions: ['read', 'write', 'execute']})" class="btn" style="background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test contains_all</button>
+      <pre id="contains_all-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>contains_any - Check if array contains any element</h4>
+      <p><strong>Use Case:</strong> Priority tag detection</p>
+      <p style="font-size: 0.9em; color: #27ae60; margin: 5px 0;"><strong>💡 Performance Tip:</strong> More efficient than multiple <code>eq</code> conditions in an <code>any</code> block!</p>
+      <button onclick="testOperator('contains_any', {tags: ['normal', 'urgent']})" class="btn" style="background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test contains_any</button>
+      <pre id="contains_any-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>intersects - Check if arrays have common elements</h4>
+      <p><strong>Use Case:</strong> Role-based access control</p>
+      <button onclick="testOperator('intersects', {user_roles: ['user', 'moderator']})" class="btn" style="background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test intersects</button>
+      <pre id="intersects-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Statistical Aggregations -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #9b59b6; margin-top: 0;">📊 Statistical Aggregations</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>sum - Calculate sum of array</h4>
+      <p><strong>Use Case:</strong> Free shipping threshold ($100+)</p>
+      <button onclick="testOperator('sum', {amounts: [25, 30, 50]})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test sum</button>
+      <pre id="sum-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>average - Calculate mean</h4>
+      <p><strong>Use Case:</strong> Latency monitoring</p>
+      <button onclick="testOperator('average', {response_times: [150, 180, 190]})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test average</button>
+      <pre id="average-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>count - Count array elements</h4>
+      <p><strong>Use Case:</strong> Error threshold alerting</p>
+      <button onclick="testOperator('count', {errors: ['err1', 'err2', 'err3', 'err4', 'err5']})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test count</button>
+      <pre id="count-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>median - Median value of array</h4>
+      <p><strong>Use Case:</strong> Statistical analysis</p>
+      <button onclick="testOperator('median', {scores: [40, 50, 60]})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test median</button>
+      <pre id="median-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>stddev - Standard deviation</h4>
+      <p><strong>Use Case:</strong> Consistency checking</p>
+      <button onclick="testOperator('stddev', {values: [10, 11, 12, 13, 14]})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test stddev</button>
+      <pre id="stddev-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>percentile - Nth percentile calculation</h4>
+      <p><strong>Use Case:</strong> P95 latency monitoring</p>
+      <button onclick="testOperator('percentile', {latencies: [100, 120, 150, 180, 190, 200, 210]})" class="btn" style="background: #9b59b6; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test percentile</button>
+      <pre id="percentile-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Date/Time Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #3498db; margin-top: 0;">📅 Date/Time Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>before_date - Check if date is before specified date</h4>
+      <p><strong>Use Case:</strong> License expiration check</p>
+      <button onclick="testOperator('before_date', {expires_at: '2025-06-01'})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test before_date</button>
+      <pre id="before_date-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>within_days - Check if date is within N days</h4>
+      <p><strong>Use Case:</strong> Upcoming event reminder</p>
+      <button onclick="testOperator('within_days', {event_date: new Date(Date.now() + 3*24*60*60*1000).toISOString().split('T')[0]})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test within_days</button>
+      <pre id="within_days-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>duration_seconds - Duration calculation</h4>
+      <p><strong>Use Case:</strong> Session timeout check</p>
+      <button onclick="testOperator('duration_seconds', {start_time: new Date(Date.now() - 1800*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test duration_seconds</button>
+      <pre id="duration_seconds-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>hour_of_day - Extract hour from timestamp</h4>
+      <p><strong>Use Case:</strong> Business hours check</p>
+      <button onclick="testOperator('hour_of_day', {timestamp: new Date().toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test hour_of_day</button>
+      <pre id="hour_of_day-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>day_of_month, month, year, week_of_year - Time component extraction</h4>
+      <p><strong>Use Case:</strong> Date-based rules (payroll dates, seasonal events)</p>
+      <button onclick="testOperator('day_of_month', {date: new Date('2025-01-15').toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test day_of_month</button>
+      <button onclick="testOperator('month', {event_date: new Date('2025-12-25').toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test month</button>
+      <button onclick="testOperator('year', {timestamp: new Date('2025-06-15').toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test year</button>
+      <button onclick="testOperator('week_of_year', {date: new Date('2025-01-01').toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test week_of_year</button>
+      <pre id="day_of_month-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="month-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="year-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="week_of_year-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>subtract_days, add_hours, subtract_hours, add_minutes, subtract_minutes - Date arithmetic</h4>
+      <p><strong>Use Case:</strong> Deadline calculations, time-based triggers</p>
+      <button onclick="testOperator('subtract_days', {deadline: new Date(Date.now() + 2*24*60*60*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test subtract_days</button>
+      <button onclick="testOperator('add_hours', {start: new Date(Date.now() - 7200*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test add_hours</button>
+      <button onclick="testOperator('subtract_hours', {deadline: new Date(Date.now() + 3600*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test subtract_hours</button>
+      <button onclick="testOperator('add_minutes', {start: new Date(Date.now() - 1800*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test add_minutes</button>
+      <button onclick="testOperator('subtract_minutes', {deadline: new Date(Date.now() + 900*1000).toISOString()})" class="btn" style="background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test subtract_minutes</button>
+      <pre id="subtract_days-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="add_hours-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="subtract_hours-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="add_minutes-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="subtract_minutes-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Moving Window Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #8e44ad; margin-top: 0;">📈 Moving Window Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>moving_sum, moving_max, moving_min - Moving window calculations</h4>
+      <p><strong>Use Case:</strong> Trend analysis, peak detection, rolling aggregations</p>
+      <button onclick="testOperator('moving_sum', {values: [10, 10, 10, 5]})" class="btn" style="background: #8e44ad; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test moving_sum</button>
+      <button onclick="testOperator('moving_max', {metrics: [80, 85, 90, 95, 100, 105]})" class="btn" style="background: #8e44ad; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">Test moving_max</button>
+      <button onclick="testOperator('moving_min', {values: [10, 5, 8, 12]})" class="btn" style="background: #8e44ad; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test moving_min</button>
+      <pre id="moving_sum-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="moving_max-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+      <pre id="moving_min-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- String Aggregations -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #27ae60; margin-top: 0;">🔤 String Aggregations</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>length - Length of string or array</h4>
+      <p><strong>Use Case:</strong> Validation checks</p>
+      <button onclick="testOperator('length', {description: 'This is a valid description'})" class="btn" style="background: #27ae60; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test length</button>
+      <pre id="length-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Geospatial Operators -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;">
+    <h3 style="color: #e74c3c; margin-top: 0;">🌍 Geospatial Operators</h3>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+      <h4>within_radius - Check if point is within radius</h4>
+      <p><strong>Use Case:</strong> Delivery zone validation</p>
+      <p style="font-size: 0.9em; color: #27ae60; margin: 5px 0;"><strong>💡 Performance Tip:</strong> Use <code>within_radius</code> for circular areas (faster), <code>in_polygon</code> for irregular shapes.</p>
+      <button onclick="testOperator('within_radius', {location: {lat: 40.7200, lon: -74.0000}})" class="btn" style="background: #e74c3c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test within_radius</button>
+      <pre id="within_radius-result" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+
+  <!-- Complex Combination Example -->
+  <div class="operator-section" style="margin: 30px 0; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+    <h3 style="color: #2c3e50; margin-top: 0;">🔗 Complex Combination Example</h3>
+    <p>Combining multiple operators in a single rule</p>
+    
+    <div class="example-card" style="margin: 15px 0; padding: 15px; background: white; border-radius: 6px;">
+      <h4>Multi-operator Rule: Email + Age + Roles</h4>
+      <p><strong>Use Case:</strong> Access approval requiring company email, age 18-65, and admin/manager role</p>
+      <button onclick="testOperator('complex', {email: 'user@company.com', age: 30, roles: ['user', 'admin']})" class="btn" style="background: #2c3e50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Test Complex Rule</button>
+      <pre id="complex-result" style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px; display: none;"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Operator rule definitions
+  const operatorRules = {
+    contains: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "error_detection",
+        if: { field: "message", op: "contains", value: "error" },
+        then: { decision: "alert", weight: 0.9, reason: "Error found in message" }
+      }]
+    },
+    starts_with: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "error_code",
+        if: { field: "code", op: "starts_with", value: "ERR" },
+        then: { decision: "error_handler", weight: 1.0 }
+      }]
+    },
+    ends_with: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "pdf_processor",
+        if: { field: "filename", op: "ends_with", value: ".pdf" },
+        then: { decision: "process_pdf", weight: 1.0 }
+      }]
+    },
+    matches: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "email_validation",
+        if: { field: "email", op: "matches", value: "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" },
+        then: { decision: "valid_email", weight: 1.0 }
+      }]
+    },
+    between: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "age_check",
+        if: { field: "age", op: "between", value: [18, 65] },
+        then: { decision: "eligible", weight: 0.9 }
+      }]
+    },
+    modulo: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "even_check",
+        if: { field: "number", op: "modulo", value: [2, 0] },
+        then: { decision: "even", weight: 1.0 }
+      }]
+    },
+    sqrt: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "square_root",
+        if: { field: "number", op: "sqrt", value: 3.0 },
+        then: { decision: "square_root", weight: 1.0 }
+      }]
+    },
+    abs: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "absolute",
+        if: { field: "value", op: "abs", value: 5 },
+        then: { decision: "absolute", weight: 1.0 }
+      }]
+    },
+    sin: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "zero_angle",
+        if: { field: "angle", op: "sin", value: 0.0 },
+        then: { decision: "zero_angle", weight: 1.0 }
+      }]
+    },
+    cos: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "zero_angle",
+        if: { field: "angle", op: "cos", value: 1.0 },
+        then: { decision: "zero_angle", weight: 1.0 }
+      }]
+    },
+    power: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "power_match",
+        if: { field: "base", op: "power", value: [2, 4] },
+        then: { decision: "power_match", weight: 1.0 }
+      }]
+    },
+    round: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "rounded",
+        if: { field: "value", op: "round", value: 3 },
+        then: { decision: "rounded", weight: 1.0 }
+      }]
+    },
+    floor: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "floored",
+        if: { field: "value", op: "floor", value: 3 },
+        then: { decision: "floored", weight: 1.0 }
+      }]
+    },
+    ceil: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "ceiled",
+        if: { field: "value", op: "ceil", value: 4 },
+        then: { decision: "ceiled", weight: 1.0 }
+      }]
+    },
+    min: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "min_found",
+        if: { field: "numbers", op: "min", value: 1 },
+        then: { decision: "min_found", weight: 1.0 }
+      }]
+    },
+    max: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "max_found",
+        if: { field: "numbers", op: "max", value: 5 },
+        then: { decision: "max_found", weight: 1.0 }
+      }]
+    },
+    contains_all: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "permission_check",
+        if: { field: "permissions", op: "contains_all", value: ["read", "write"] },
+        then: { decision: "full_access", weight: 1.0 }
+      }]
+    },
+    contains_any: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "priority_check",
+        if: { field: "tags", op: "contains_any", value: ["urgent", "critical"] },
+        then: { decision: "prioritize", weight: 0.95 }
+      }]
+    },
+    intersects: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "role_check",
+        if: { field: "user_roles", op: "intersects", value: ["admin", "moderator"] },
+        then: { decision: "has_elevated_role", weight: 1.0 }
+      }]
+    },
+    sum: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "total_check",
+        if: { field: "amounts", op: "sum", value: { gte: 100 } },
+        then: { decision: "free_shipping", weight: 1.0 }
+      }]
+    },
+    average: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "latency_check",
+        if: { field: "response_times", op: "average", value: { lt: 200 } },
+        then: { decision: "acceptable", weight: 0.9 }
+      }]
+    },
+    count: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "error_threshold",
+        if: { field: "errors", op: "count", value: { gte: 5 } },
+        then: { decision: "alert", weight: 1.0 }
+      }]
+    },
+    median: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "median_match",
+        if: { field: "scores", op: "median", value: 50 },
+        then: { decision: "median_match", weight: 1.0 }
+      }]
+    },
+    stddev: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "low_variance",
+        if: { field: "values", op: "stddev", value: { lt: 5 } },
+        then: { decision: "low_variance", weight: 0.9 }
+      }]
+    },
+    percentile: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "p95_ok",
+        if: { field: "latencies", op: "percentile", value: { percentile: 95, threshold: 200 } },
+        then: { decision: "p95_ok", weight: 0.95 }
+      }]
+    },
+    before_date: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "expiration_check",
+        if: { field: "expires_at", op: "before_date", value: "2025-12-31" },
+        then: { decision: "not_expired", weight: 0.8 }
+      }]
+    },
+    within_days: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "upcoming_event",
+        if: { field: "event_date", op: "within_days", value: 7 },
+        then: { decision: "upcoming", weight: 1.0 }
+      }]
+    },
+    duration_seconds: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "within_hour",
+        if: { field: "start_time", op: "duration_seconds", value: { end: "now", max: 3600 } },
+        then: { decision: "within_hour", weight: 1.0 }
+      }]
+    },
+    hour_of_day: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "business_hours",
+        if: { field: "timestamp", op: "hour_of_day", value: { gte: 9, lte: 17 } },
+        then: { decision: "business_hours", weight: 1.0 }
+      }]
+    },
+    day_of_month: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "mid_month",
+        if: { field: "date", op: "day_of_month", value: 15 },
+        then: { decision: "mid_month", weight: 1.0 }
+      }]
+    },
+    month: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "december",
+        if: { field: "event_date", op: "month", value: 12 },
+        then: { decision: "december", weight: 1.0 }
+      }]
+    },
+    year: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "current_year",
+        if: { field: "timestamp", op: "year", value: 2025 },
+        then: { decision: "current_year", weight: 1.0 }
+      }]
+    },
+    week_of_year: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "first_week",
+        if: { field: "date", op: "week_of_year", value: 1 },
+        then: { decision: "first_week", weight: 1.0 }
+      }]
+    },
+    subtract_days: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "not_urgent",
+        if: { field: "deadline", op: "subtract_days", value: { days: 1, compare: "gt", target: "now" } },
+        then: { decision: "not_urgent", weight: 1.0 }
+      }]
+    },
+    add_hours: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "past_2h",
+        if: { field: "start", op: "add_hours", value: { hours: 2, compare: "lt", target: "now" } },
+        then: { decision: "past_2h", weight: 1.0 }
+      }]
+    },
+    subtract_hours: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "within_hour",
+        if: { field: "deadline", op: "subtract_hours", value: { hours: 1, compare: "gt", target: "now" } },
+        then: { decision: "within_hour", weight: 1.0 }
+      }]
+    },
+    add_minutes: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "past_30min",
+        if: { field: "start", op: "add_minutes", value: { minutes: 30, compare: "lt", target: "now" } },
+        then: { decision: "past_30min", weight: 1.0 }
+      }]
+    },
+    subtract_minutes: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "within_15min",
+        if: { field: "deadline", op: "subtract_minutes", value: { minutes: 15, compare: "gt", target: "now" } },
+        then: { decision: "within_15min", weight: 1.0 }
+      }]
+    },
+    moving_sum: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "match",
+        if: { field: "values", op: "moving_sum", value: { window: 3, gte: 25 } },
+        then: { decision: "match", weight: 1.0 }
+      }]
+    },
+    moving_max: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "high_peak",
+        if: { field: "metrics", op: "moving_max", value: { window: 5, gte: 100 } },
+        then: { decision: "high_peak", weight: 1.0 }
+      }]
+    },
+    moving_min: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "low_dip",
+        if: { field: "values", op: "moving_min", value: { window: 3, lte: 5 } },
+        then: { decision: "low_dip", weight: 1.0 }
+      }]
+    },
+    within_radius: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "delivery_zone",
+        if: {
+          field: "location",
+          op: "within_radius",
+          value: { center: { lat: 40.7128, lon: -74.0060 }, radius: 10 }
+        },
+        then: { decision: "nearby", weight: 0.9 }
+      }]
+    },
+    length: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "valid_length",
+        if: { field: "description", op: "length", value: { min: 10, max: 500 } },
+        then: { decision: "valid_length", weight: 1.0 }
+      }]
+    },
+    complex: {
+      version: "1.0",
+      ruleset: "test",
+      rules: [{
+        id: "complex_rule",
+        if: {
+          all: [
+            { field: "email", op: "ends_with", value: "@company.com" },
+            { field: "age", op: "between", value: [18, 65] },
+            { field: "roles", op: "contains_any", value: ["admin", "manager"] }
+          ]
+        },
+        then: { decision: "approve", weight: 1.0 }
+      }]
+    }
+  };
+
+  async function testOperator(operatorName, context) {
+    const resultElement = document.getElementById(`${operatorName}-result`);
+    resultElement.style.display = 'block';
+    resultElement.textContent = 'Testing...';
+
+    try {
+      const ruleContent = operatorRules[operatorName];
+      if (!ruleContent) {
+        resultElement.textContent = 'Error: Operator rule not found';
+        return;
+      }
+
+      // Create or update rule
+      const ruleId = `operator_test_${operatorName}`;
+      
+      const response = await fetch('/demo/test_advanced_operator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          rule_id: ruleId,
+          rule_content: ruleContent,
+          context: context
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.error) {
+        resultElement.textContent = `Error: ${result.error}`;
+      } else {
+        resultElement.textContent = JSON.stringify(result, null, 2);
+      }
+    } catch (error) {
+      resultElement.textContent = `Error: ${error.message}`;
+    }
+  }
+</script>
+

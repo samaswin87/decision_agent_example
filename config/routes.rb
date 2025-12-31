@@ -101,6 +101,10 @@ Rails.application.routes.draw do
   get "demo/decision_replay", to: "demo#decision_replay"
   post "demo/replay_decision", to: "demo#replay_decision"
 
+  # NEW: Advanced Operators
+  get "demo/advanced_operators", to: "demo#advanced_operators"
+  post "demo/test_advanced_operator", to: "demo#test_advanced_operator"
+
   # Quick Actions
   post "demo/seed_all_data", to: "demo#seed_all_data"
   post "demo/reset_database", to: "demo#reset_database"

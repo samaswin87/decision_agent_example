@@ -1512,4 +1512,91 @@ class DemoController < ApplicationController
     
     redirect_back(fallback_location: root_path)
   end
+
+  # NEW: Advanced Operators
+  def advanced_operators
+    # View for advanced operators demo
+  end
+
+  def test_advanced_operator
+    # Parse JSON body if request is JSON
+    if request.content_type&.include?('application/json')
+      json_data = JSON.parse(request.body.read)
+      rule_id = json_data['rule_id'] || json_data[:rule_id]
+      rule_content = json_data['rule_content'] || json_data[:rule_content] || {}
+      context = json_data['context'] || json_data[:context] || {}
+    else
+      rule_id = params[:rule_id]
+      rule_content = params[:rule_content] || {}
+      context = params[:context] || {}
+      
+      # Convert ActionController::Parameters to Hash
+      rule_content = rule_content.to_unsafe_h if rule_content.respond_to?(:to_unsafe_h)
+      rule_content = rule_content.to_h if rule_content.respond_to?(:to_h) && !rule_content.is_a?(Hash)
+      context = context.to_unsafe_h if context.respond_to?(:to_unsafe_h)
+      context = context.to_h if context.respond_to?(:to_h) && !context.is_a?(Hash)
+    end
+
+    begin
+      # Ensure we have valid data
+      unless rule_id.present? && rule_content.present?
+        return render json: { error: "Missing rule_id or rule_content" }, status: 400
+      end
+
+      # Create or update rule
+      rule = Rule.find_or_create_by(rule_id: rule_id) do |r|
+        r.ruleset = rule_content['ruleset'] || rule_content[:ruleset] || "test"
+        r.description = "Test rule for advanced operator: #{rule_id}"
+        r.status = "active"
+      end
+
+      # Update ruleset if it changed
+      ruleset = rule_content['ruleset'] || rule_content[:ruleset] || "test"
+      rule.update(ruleset: ruleset) if rule.ruleset != ruleset
+
+      service = DecisionService.instance
+      
+      # Save new version (content will be converted to JSON in save_rule_version)
+      version = service.save_rule_version(
+        rule_id: rule_id,
+        content: rule_content,
+        created_by: "demo_user",
+        changelog: "Test version for advanced operator"
+      )
+      
+      # Activate the new version
+      version.activate!
+      
+      # Reload rule to get updated active_version
+      rule.reload
+
+      # Clear cache to ensure fresh evaluation
+      service.clear_cache
+
+      # Evaluate with context (ensure it's a proper hash)
+      eval_context = if context.is_a?(Hash)
+        # Convert all keys to symbols for consistency
+        context.deep_symbolize_keys
+      else
+        context
+      end
+
+      result = service.evaluate(
+        rule_id: rule_id,
+        context: eval_context
+      )
+
+      render json: result
+    rescue => e
+      Rails.logger.error("Error in test_advanced_operator: #{e.message}")
+      Rails.logger.error(e.backtrace.join("\n"))
+      render json: { 
+        error: e.message, 
+        backtrace: Rails.env.development? ? e.backtrace.first(5) : nil,
+        rule_id: rule_id,
+        rule_content_type: rule_content.class.name,
+        rule_content_keys: rule_content.is_a?(Hash) ? rule_content.keys.first(5) : nil
+      }, status: 500
+    end
+  end
 end

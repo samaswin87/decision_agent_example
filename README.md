@@ -400,11 +400,107 @@ Rules use JSON with `if/then` syntax:
 ```
 
 ### Supported Operators
+
+#### Basic Operators
 - `eq` - Equal
+- `neq` - Not equal
 - `gte` - Greater than or equal
 - `lte` - Less than or equal
 - `lt` - Less than
 - `gt` - Greater than
+- `in` - Value is in array
+- `present` - Field is present (not nil)
+- `blank` - Field is blank or nil
+
+#### String Operators (NEW!)
+- `contains` - String contains substring (case-sensitive)
+- `starts_with` - String starts with prefix
+- `ends_with` - String ends with suffix
+- `matches` - String matches regular expression pattern
+
+#### Numeric Operators (NEW!)
+- `between` - Value is between min and max (inclusive)
+- `modulo` - Value modulo divisor equals remainder (useful for A/B testing)
+- `sqrt` - Square root calculation
+- `abs` - Absolute value
+- `round` - Round to nearest integer
+- `floor` - Floor (round down)
+- `ceil` - Ceil (round up)
+- `sin`, `cos`, `tan` - Trigonometric functions
+- `exp`, `log` - Exponential and logarithmic functions
+- `power` - Power calculation (base^exponent)
+- `min`, `max` - Minimum/maximum from array
+
+#### Collection Operators (NEW!)
+- `contains_all` - Array contains all specified elements
+- `contains_any` - Array contains any of the specified elements
+- `intersects` - Arrays have common elements (set intersection)
+- `subset_of` - Array is a subset of another array
+
+#### Statistical Aggregations (NEW!)
+- `sum` - Sum of numeric array elements
+- `average` / `mean` - Average (mean) of numeric array
+- `median` - Median value of numeric array
+- `stddev` / `standard_deviation` - Standard deviation
+- `variance` - Variance calculation
+- `percentile` - Nth percentile of numeric array
+- `count` - Count of array elements
+
+#### Date/Time Operators (NEW!)
+- `before_date` - Date is before specified date
+- `after_date` - Date is after specified date
+- `within_days` - Date is within N days from now
+- `day_of_week` - Date falls on specified day (Monday, Tuesday, etc.)
+- `duration_seconds`, `duration_minutes`, `duration_hours`, `duration_days` - Duration calculations
+- `add_days`, `subtract_days`, `add_hours`, `subtract_hours` - Date arithmetic
+- `hour_of_day`, `day_of_month`, `month`, `year`, `week_of_year` - Time component extraction
+- `rate_per_second`, `rate_per_minute`, `rate_per_hour` - Rate calculations from timestamps
+- `moving_average`, `moving_sum`, `moving_max`, `moving_min` - Moving window calculations
+
+#### Geospatial Operators (NEW!)
+- `within_radius` - Point is within radius of center (Haversine formula)
+- `in_polygon` - Point is inside polygon (ray casting algorithm)
+
+#### Financial Calculations (NEW!)
+- `compound_interest` - Compound interest calculation
+- `present_value` - Present value calculation
+- `future_value` - Future value calculation
+- `payment` - Loan payment (PMT) calculation
+
+#### String Aggregations (NEW!)
+- `join` - Join array of strings with separator
+- `length` - Length of string or array
+
+**See the [Advanced Operators Demo](/demo/advanced_operators) for interactive examples!**
+
+### Operator Performance Best Practices
+
+When choosing operators, consider performance implications:
+
+1. **String Operations**: `contains`, `starts_with`, and `ends_with` are **faster** than `matches` (regex). Use regex only when pattern matching is necessary.
+
+2. **Geospatial**: Prefer `within_radius` for **circular areas**, `in_polygon` for **irregular shapes**. Radius checks are faster for simple distance calculations.
+
+3. **Collections**: Use `contains_any` instead of multiple `eq` conditions in an `any` block. It's more efficient and readable.
+
+**Example - Optimized Collection Check:**
+```json
+// ❌ Less efficient
+{
+  "any": [
+    { "field": "status", "op": "eq", "value": "urgent" },
+    { "field": "status", "op": "eq", "value": "critical" },
+    { "field": "status", "op": "eq", "value": "emergency" }
+  ]
+}
+
+// ✅ More efficient
+{
+  "field": "status",
+  "op": "contains_any",
+  "value": ["urgent", "critical", "emergency"]
+}
+```
 
 ### Condition Types
 - `all` - All conditions must match (AND)
@@ -440,6 +536,9 @@ rails test
 
 # Run specific test file
 rails test test/services/decision_service_test.rb
+
+# Run advanced operators tests
+rails test test/services/advanced_operators_test.rb
 
 # Run use case tests
 rails test test/use_cases/
