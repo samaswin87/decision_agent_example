@@ -1,0 +1,172 @@
+<div class="container my-5">
+  <h1 class="mb-4">🎯 DMN Hit Policies Examples</h1>
+
+  <div class="alert alert-info">
+    <strong>About Hit Policies:</strong> DMN decision tables support different hit policies that determine how multiple matching rules are handled.
+    This example demonstrates UNIQUE, PRIORITY, ANY, and COLLECT policies.
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @policy == 'unique' %>" href="?policy=unique">UNIQUE</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @policy == 'priority' %>" href="?policy=priority">PRIORITY</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @policy == 'any' %>" href="?policy=any">ANY</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @policy == 'collect' %>" href="?policy=collect">COLLECT</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Test <%= @policy&.upcase %> Hit Policy</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with url: demo_dmn_hit_policies_path, method: :post, local: true do |f| %>
+            <%= hidden_field_tag :policy, @policy %>
+
+            <% case @policy %>
+            <% when 'unique' %>
+              <div class="mb-3">
+                <%= f.label :income, "Annual Income ($)", class: "form-label" %>
+                <%= f.number_field :income, value: 50000, min: 0, class: "form-control" %>
+                <small class="form-text text-muted">UNIQUE: Exactly one rule must match</small>
+              </div>
+
+            <% when 'priority' %>
+              <div class="mb-3">
+                <%= f.label :customer_tier, "Customer Tier", class: "form-label" %>
+                <%= f.select :customer_tier, [['Platinum', 'platinum'], ['Gold', 'gold'], ['Silver', 'silver'], ['Standard', 'standard']], { selected: 'gold' }, { class: "form-control" } %>
+              </div>
+              <div class="mb-3">
+                <%= f.label :purchase_amount, "Purchase Amount ($)", class: "form-label" %>
+                <%= f.number_field :purchase_amount, value: 600, min: 0, class: "form-control" %>
+                <small class="form-text text-muted">PRIORITY: Returns first matching rule (highest priority)</small>
+              </div>
+
+            <% when 'any' %>
+              <div class="mb-3">
+                <%= f.label :age, "Age", class: "form-label" %>
+                <%= f.number_field :age, value: 25, min: 0, class: "form-control" %>
+              </div>
+              <div class="mb-3">
+                <%= f.label :email_valid, "Email Valid", class: "form-label" %>
+                <%= f.check_box :email_valid, { checked: true }, 'true', 'false' %>
+                <small class="form-text text-muted">ANY: All matching rules must have same output</small>
+              </div>
+              <div class="mb-3">
+                <%= f.label :phone_valid, "Phone Valid", class: "form-label" %>
+                <%= f.check_box :phone_valid, { checked: true }, 'true', 'false' %>
+              </div>
+
+            <% when 'collect' %>
+              <div class="mb-3">
+                <%= f.label :budget, "Budget ($)", class: "form-label" %>
+                <%= f.number_field :budget, value: 600, min: 0, class: "form-control" %>
+              </div>
+              <div class="mb-3">
+                <%= f.label :category, "Category", class: "form-label" %>
+                <%= f.select :category, [['Electronics', 'electronics'], ['Books', 'books']], { selected: 'electronics' }, { class: "form-control" } %>
+                <small class="form-text text-muted">COLLECT: Returns all matching rules</small>
+              </div>
+            <% end %>
+
+            <%= f.submit "Evaluate Decision", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <% if @result %>
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Decision Result</h5>
+          </div>
+          <div class="card-body">
+            <% if @result[:error] %>
+              <div class="alert alert-danger">
+                <strong>Error:</strong> <%= @result[:error] %>
+              </div>
+            <% else %>
+              <div class="mb-3">
+                <strong>Decision:</strong>
+                <span class="badge bg-primary"><%= @result[:decision] %></span>
+              </div>
+
+              <div class="mb-3">
+                <strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%
+              </div>
+
+              <div class="mb-3">
+                <strong>Reason:</strong>
+                <p class="text-muted"><%= @result[:reason] %></p>
+              </div>
+
+              <% if @result[:metadata] && @result[:metadata][:collect_count] %>
+                <div class="alert alert-info">
+                  <strong>COLLECT Results:</strong>
+                  <ul>
+                    <li>Total Matches: <%= @result[:metadata][:collect_count] %></li>
+                    <li>All Decisions: <%= @result[:metadata][:collect_decisions]&.join(', ') %></li>
+                    <li>Rule IDs: <%= @result[:metadata][:collect_rule_ids]&.join(', ') %></li>
+                  </ul>
+                </div>
+              <% end %>
+
+              <details class="mt-3">
+                <summary class="btn btn-outline-secondary btn-sm">View Metadata</summary>
+                <pre class="mt-2" style="max-height: 200px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 5px;"><%= JSON.pretty_generate(@result[:metadata] || {}) %></pre>
+              </details>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Hit Policy Descriptions</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>UNIQUE</h6>
+              <p>Exactly one rule must match. Raises error if zero or multiple rules match. Perfect for mutually exclusive categories like tax brackets.</p>
+
+              <h6>PRIORITY</h6>
+              <p>Returns the first matching rule (top-to-bottom order). Multiple rules can match, but highest priority wins. Great for tiered systems.</p>
+            </div>
+            <div class="col-md-6">
+              <h6>ANY</h6>
+              <p>All matching rules must have the same output. Raises error if rules conflict. Ideal for validation where multiple checks must agree.</p>
+
+              <h6>COLLECT</h6>
+              <p>Returns all matching rules. First match is primary decision, but metadata includes all matches. Perfect for recommendations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <a href="/demo/all_use_cases" class="btn btn-outline-secondary">← Back to All Use Cases</a>
+    </div>
+  </div>
+</div>
+

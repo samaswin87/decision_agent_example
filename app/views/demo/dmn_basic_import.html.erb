@@ -1,0 +1,107 @@
+<div class="container my-5">
+  <h1 class="mb-4">📋 DMN Basic Import Example</h1>
+
+  <div class="alert alert-info">
+    <strong>About DMN:</strong> Decision Model and Notation (DMN) is an industry standard for decision modeling.
+    This example demonstrates importing a DMN XML model and using it to make decisions.
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Test DMN Decision</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with url: demo_dmn_basic_import_path, method: :post, local: true do |f| %>
+            <div class="mb-3">
+              <%= f.label :credit_score, "Credit Score", class: "form-label" %>
+              <%= f.number_field :credit_score, value: 720, min: 300, max: 850, class: "form-control" %>
+              <small class="form-text text-muted">Enter a credit score between 300 and 850</small>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :income, "Annual Income ($)", class: "form-label" %>
+              <%= f.number_field :income, value: 65000, min: 0, class: "form-control" %>
+              <small class="form-text text-muted">Enter annual income in dollars</small>
+            </div>
+
+            <%= f.submit "Evaluate Decision", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <% if @result %>
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Decision Result</h5>
+          </div>
+          <div class="card-body">
+            <% if @result[:error] %>
+              <div class="alert alert-danger">
+                <strong>Error:</strong> <%= @result[:error] %>
+              </div>
+            <% else %>
+              <div class="mb-3">
+                <strong>Decision:</strong>
+                <span class="badge bg-<%= @result[:decision] == 'approved' ? 'success' : (@result[:decision] == 'conditional' ? 'warning' : 'danger') %>">
+                  <%= @result[:decision]&.upcase %>
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%
+              </div>
+
+              <div class="mb-3">
+                <strong>Reason:</strong>
+                <p class="text-muted"><%= @result[:reason] %></p>
+              </div>
+
+              <% if @result[:metadata] %>
+                <details class="mt-3">
+                  <summary class="btn btn-outline-secondary btn-sm">View Metadata</summary>
+                  <pre class="mt-2" style="max-height: 200px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 5px;"><%= JSON.pretty_generate(@result[:metadata]) %></pre>
+                </details>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">DMN Model Structure</h5>
+        </div>
+        <div class="card-body">
+          <p>This example uses a DMN decision table with the following structure:</p>
+          <ul>
+            <li><strong>Hit Policy:</strong> FIRST (returns first matching rule)</li>
+            <li><strong>Inputs:</strong> credit_score (number), income (number)</li>
+            <li><strong>Output:</strong> decision (string: "approved", "conditional", or "rejected")</li>
+            <li><strong>Rules:</strong>
+              <ul>
+                <li>Rule 1: Approve if credit_score >= 750 AND income >= 75000</li>
+                <li>Rule 2: Conditional if credit_score >= 650 AND income >= 50000</li>
+                <li>Rule 3: Reject otherwise (catch-all)</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <a href="/demo/all_use_cases" class="btn btn-outline-secondary">← Back to All Use Cases</a>
+    </div>
+  </div>
+</div>
+

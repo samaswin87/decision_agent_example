@@ -105,6 +105,16 @@ Rails.application.routes.draw do
   get "demo/advanced_operators", to: "demo#advanced_operators"
   post "demo/test_advanced_operator", to: "demo#test_advanced_operator"
 
+  # NEW: DMN Examples
+  get "demo/dmn_basic_import", to: "demo#dmn_basic_import"
+  post "demo/dmn_basic_import", to: "demo#dmn_basic_import"
+  get "demo/dmn_hit_policies", to: "demo#dmn_hit_policies"
+  post "demo/dmn_hit_policies", to: "demo#dmn_hit_policies"
+  get "demo/dmn_combining_evaluators", to: "demo#dmn_combining_evaluators"
+  post "demo/dmn_combining_evaluators", to: "demo#dmn_combining_evaluators"
+  get "demo/dmn_real_world_pricing", to: "demo#dmn_real_world_pricing"
+  post "demo/dmn_real_world_pricing", to: "demo#dmn_real_world_pricing"
+
   # Quick Actions
   post "demo/seed_all_data", to: "demo#seed_all_data"
   post "demo/reset_database", to: "demo#reset_database"

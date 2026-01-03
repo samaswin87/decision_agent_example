@@ -144,12 +144,56 @@
                 <li>Department-based access</li>
                 <li>Custom permission system</li>
               </ul>
+
+            <% when 'dmn_basic_import' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>DMN XML import</li>
+                <li>Decision table execution</li>
+                <li>FEEL expressions</li>
+                <li>FIRST hit policy</li>
+                <li>Standards-based decision modeling</li>
+              </ul>
+
+            <% when 'dmn_hit_policies' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>UNIQUE hit policy</li>
+                <li>PRIORITY hit policy</li>
+                <li>ANY hit policy</li>
+                <li>COLLECT hit policy</li>
+                <li>Multiple rule matching scenarios</li>
+              </ul>
+
+            <% when 'dmn_combining_evaluators' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>DMN + JSON evaluators</li>
+                <li>Multi-evaluator agents</li>
+                <li>Decision aggregation</li>
+                <li>Override handling</li>
+                <li>Combined decision making</li>
+              </ul>
+
+            <% when 'dmn_real_world_pricing' %>
+              <h6 class="mt-3">Features:</h6>
+              <ul class="small">
+                <li>Complex pricing logic</li>
+                <li>Customer segment pricing</li>
+                <li>Product category discounts</li>
+                <li>Volume-based pricing</li>
+                <li>Promotional code overrides</li>
+              </ul>
             <% end %>
 
             <div class="mt-3">
               <% if ['pundit_adapter', 'devise_cancancan_adapter', 'default_adapter', 'custom_adapter'].include?(use_case[:id]) %>
                 <a href="<%= url_for(action: use_case[:id], controller: 'demo') %>" class="btn btn-primary btn-sm">
                   🧪 Test Adapter
+                </a>
+              <% elsif ['dmn_basic_import', 'dmn_hit_policies', 'dmn_combining_evaluators', 'dmn_real_world_pricing'].include?(use_case[:id]) %>
+                <a href="<%= url_for(action: use_case[:id], controller: 'demo') %>" class="btn btn-primary btn-sm">
+                  🧪 Test DMN Example
                 </a>
               <% else %>
                 <button class="btn btn-primary btn-sm" onclick="testUseCase('<%= use_case[:id] %>')">

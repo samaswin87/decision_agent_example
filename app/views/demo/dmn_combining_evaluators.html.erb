@@ -1,0 +1,145 @@
+<div class="container my-5">
+  <h1 class="mb-4">🔗 DMN Combining Evaluators Example</h1>
+
+  <div class="alert alert-info">
+    <strong>About Combining Evaluators:</strong> This example demonstrates using DMN evaluators alongside JSON rule evaluators in the same agent.
+    DMN provides standardized decision tables, while JSON rules handle custom business policies and overrides.
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Test Combined Evaluators</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with url: demo_dmn_combining_evaluators_path, method: :post, local: true do |f| %>
+            <div class="mb-3">
+              <%= f.label :credit_score, "Credit Score", class: "form-label" %>
+              <%= f.number_field :credit_score, value: 680, min: 300, max: 850, class: "form-control" %>
+              <small class="form-text text-muted">DMN evaluator uses this for credit risk assessment</small>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :customer_tier, "Customer Tier", class: "form-label" %>
+              <%= f.select :customer_tier, [['', ''], ['Platinum', 'platinum'], ['Gold', 'gold'], ['Silver', 'silver']], {}, { class: "form-control" } %>
+              <small class="form-text text-muted">JSON evaluator: VIP override</small>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :fraud_alert, "Fraud Alert", class: "form-label" %>
+              <%= f.check_box :fraud_alert, {}, 'true', 'false' %>
+              <small class="form-text text-muted">JSON evaluator: Automatic rejection</small>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :customer_age_days, "Customer Age (days)", class: "form-label" %>
+              <%= f.number_field :customer_age_days, value: 0, min: 0, class: "form-control" %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :promotional_code, "Promotional Code", class: "form-label" %>
+              <%= f.text_field :promotional_code, value: '', class: "form-control", placeholder: "e.g., NEWCUST2024" %>
+              <small class="form-text text-muted">JSON evaluator: New customer promotion</small>
+            </div>
+
+            <%= f.submit "Evaluate Decision", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <% if @result %>
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Decision Result</h5>
+          </div>
+          <div class="card-body">
+            <% if @result[:error] %>
+              <div class="alert alert-danger">
+                <strong>Error:</strong> <%= @result[:error] %>
+              </div>
+            <% else %>
+              <div class="mb-3">
+                <strong>Final Decision:</strong>
+                <span class="badge bg-primary"><%= @result[:decision] %></span>
+              </div>
+
+              <div class="mb-3">
+                <strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%
+              </div>
+
+              <% if @result[:evaluations] %>
+                <div class="mb-3">
+                  <strong>Individual Evaluations:</strong>
+                  <ul class="list-group mt-2">
+                    <% @result[:evaluations].each do |eval| %>
+                      <li class="list-group-item">
+                        <strong><%= eval[:evaluator_name] %>:</strong>
+                        <span class="badge bg-secondary"><%= eval[:decision] %></span>
+                        <br>
+                        <small class="text-muted">Weight: <%= eval[:weight] %>, Reason: <%= eval[:reason] %></small>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+
+              <% if @result[:explanations] %>
+                <div class="mb-3">
+                  <strong>Explanations:</strong>
+                  <ul>
+                    <% @result[:explanations].each do |explanation| %>
+                      <li><%= explanation %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">How It Works</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>DMN Evaluator (Credit Risk)</h6>
+              <ul>
+                <li>Uses standardized DMN decision table</li>
+                <li>Evaluates credit score to determine risk level</li>
+                <li>Returns: "low", "medium", or "high"</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>JSON Evaluator (Business Policies)</h6>
+              <ul>
+                <li>VIP customers: Automatic approval</li>
+                <li>Fraud alert: Automatic rejection</li>
+                <li>New customer promotion: Conditional approval</li>
+              </ul>
+            </div>
+          </div>
+          <div class="alert alert-warning mt-3">
+            <strong>Note:</strong> The agent combines results from both evaluators. JSON evaluator overrides can take precedence based on weights.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <a href="/demo/all_use_cases" class="btn btn-outline-secondary">← Back to All Use Cases</a>
+    </div>
+  </div>
+</div>
+

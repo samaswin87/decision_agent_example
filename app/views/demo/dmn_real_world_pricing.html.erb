@@ -1,0 +1,124 @@
+<div class="container my-5">
+  <h1 class="mb-4">💰 DMN Real-World Pricing Example</h1>
+
+  <div class="alert alert-info">
+    <strong>About Real-World Pricing:</strong> This example demonstrates complex e-commerce pricing logic using DMN.
+    It handles customer segments, product categories, volume discounts, and promotional codes with PRIORITY hit policy.
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Calculate Pricing</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with url: demo_dmn_real_world_pricing_path, method: :post, local: true do |f| %>
+            <div class="mb-3">
+              <%= f.label :customer_segment, "Customer Segment", class: "form-label" %>
+              <%= f.select :customer_segment, [['VIP', 'vip'], ['Premium', 'premium'], ['Standard', 'standard']], { selected: 'standard' }, { class: "form-control" } %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :product_category, "Product Category", class: "form-label" %>
+              <%= f.select :product_category, [['Electronics', 'electronics'], ['Books', 'books'], ['Clothing', 'clothing']], { selected: 'electronics' }, { class: "form-control" } %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :quantity, "Quantity", class: "form-label" %>
+              <%= f.number_field :quantity, value: 1, min: 1, class: "form-control" %>
+              <small class="form-text text-muted">Bulk discounts apply for 10+ units</small>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :promo_code, "Promotional Code", class: "form-label" %>
+              <%= f.text_field :promo_code, value: '', class: "form-control", placeholder: "e.g., SUMMER2024" %>
+            </div>
+
+            <%= f.submit "Calculate Discount", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <% if @result %>
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Pricing Result</h5>
+          </div>
+          <div class="card-body">
+            <% if @result[:error] %>
+              <div class="alert alert-danger">
+                <strong>Error:</strong> <%= @result[:error] %>
+              </div>
+            <% else %>
+              <div class="mb-3">
+                <strong>Discount Percentage:</strong>
+                <span class="badge bg-success" style="font-size: 1.2em;">
+                  <%= @result[:discount_percentage] %>%
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <strong>Pricing Tier:</strong>
+                <span class="badge bg-info"><%= @result[:tier] || 'standard' %></span>
+              </div>
+
+              <div class="mb-3">
+                <strong>Decision Value:</strong> <%= @result[:decision] %>
+              </div>
+
+              <div class="mb-3">
+                <strong>Confidence:</strong> <%= (@result[:confidence] * 100).round(1) %>%
+              </div>
+
+              <div class="mb-3">
+                <strong>Reason:</strong>
+                <p class="text-muted"><%= @result[:reason] %></p>
+              </div>
+
+              <% if @result[:metadata] %>
+                <details class="mt-3">
+                  <summary class="btn btn-outline-secondary btn-sm">View Metadata</summary>
+                  <pre class="mt-2" style="max-height: 200px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 5px;"><%= JSON.pretty_generate(@result[:metadata]) %></pre>
+                </details>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Pricing Rules (PRIORITY Hit Policy)</h5>
+        </div>
+        <div class="card-body">
+          <p>The pricing decision table uses PRIORITY hit policy, meaning rules are evaluated top-to-bottom and the first matching rule wins:</p>
+          <ol>
+            <li><strong>VIP + Electronics:</strong> 25% discount (highest priority)</li>
+            <li><strong>Bulk Electronics (10+):</strong> 20% discount</li>
+            <li><strong>Promotional Code (SUMMER2024):</strong> 15% discount</li>
+            <li><strong>Books Category:</strong> 10% discount</li>
+            <li><strong>Premium Segment:</strong> 10% discount</li>
+            <li><strong>Default:</strong> 0% discount (catch-all)</li>
+          </ol>
+          <div class="alert alert-warning mt-3">
+            <strong>Note:</strong> If multiple rules match, the first one (highest priority) is selected. For example, a VIP customer buying electronics will get 25% discount, not 20% from bulk pricing.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <a href="/demo/all_use_cases" class="btn btn-outline-secondary">← Back to All Use Cases</a>
+    </div>
+  </div>
+</div>
+

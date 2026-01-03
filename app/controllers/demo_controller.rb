@@ -240,6 +240,10 @@ class DemoController < ApplicationController
       { id: 'multi_stage_workflow', name: 'Multi-Stage Workflow', description: 'Complex approval workflow' },
       { id: 'ui_dashboard', name: 'UI Dashboard (NEW)', description: 'Real-time UI feedback and progress tracking' },
       { id: 'monitoring', name: 'Monitoring & Observability (NEW)', description: 'Comprehensive monitoring and performance tracking' },
+      { id: 'dmn_basic_import', name: 'DMN Basic Import', description: 'Import and use DMN decision models (DMN standard)' },
+      { id: 'dmn_hit_policies', name: 'DMN Hit Policies', description: 'Demonstrates UNIQUE, PRIORITY, ANY, and COLLECT hit policies' },
+      { id: 'dmn_combining_evaluators', name: 'DMN Combining Evaluators', description: 'Using DMN and JSON evaluators together' },
+      { id: 'dmn_real_world_pricing', name: 'DMN Real-World Pricing', description: 'Complex e-commerce pricing with DMN' },
       { id: 'pundit_adapter', name: 'Pundit Adapter', description: 'Integration with Pundit authorization library' },
       { id: 'devise_cancancan_adapter', name: 'Devise + CanCanCan Adapter', description: 'Integration with Devise authentication and CanCanCan authorization' },
       { id: 'default_adapter', name: 'Default Adapter', description: 'Default DecisionAgent RBAC adapter' },
@@ -1160,6 +1164,10 @@ class DemoController < ApplicationController
       { id: 'multi_stage_workflow', name: 'Multi-Stage Workflow', description: 'Complex approval workflow' },
       { id: 'ui_dashboard', name: 'UI Dashboard', description: 'Real-time UI feedback and progress tracking' },
       { id: 'monitoring', name: 'Monitoring & Observability', description: 'Comprehensive monitoring and performance tracking' },
+      { id: 'dmn_basic_import', name: 'DMN Basic Import', description: 'Import and use DMN decision models (DMN standard)' },
+      { id: 'dmn_hit_policies', name: 'DMN Hit Policies', description: 'Demonstrates UNIQUE, PRIORITY, ANY, and COLLECT hit policies' },
+      { id: 'dmn_combining_evaluators', name: 'DMN Combining Evaluators', description: 'Using DMN and JSON evaluators together' },
+      { id: 'dmn_real_world_pricing', name: 'DMN Real-World Pricing', description: 'Complex e-commerce pricing with DMN' },
       { id: 'pundit_adapter', name: 'Pundit Adapter', description: 'Integration with Pundit authorization library' },
       { id: 'devise_cancancan_adapter', name: 'Devise + CanCanCan Adapter', description: 'Integration with Devise authentication and CanCanCan authorization' },
       { id: 'default_adapter', name: 'Default Adapter', description: 'Default DecisionAgent RBAC adapter' },
@@ -1414,15 +1422,25 @@ class DemoController < ApplicationController
   end
 
   # NEW: RBAC Testing Actions
+  public
+
   def rbac_batch_testing
     # UI view for RBAC batch testing
     @roles = RbacUseCase::ROLES
   end
 
   def rbac_batch_test
-    batch_size = params[:batch_size]&.to_i || 100
-    parallel = params[:parallel] == 'true' || params[:parallel] == true
-    role_distribution = params[:role_distribution] || {}
+    # Parse JSON body if request is JSON
+    if request.content_type&.include?('application/json')
+      json_data = JSON.parse(request.body.read)
+      batch_size = json_data['batch_size']&.to_i || json_data[:batch_size]&.to_i || 100
+      parallel = json_data['parallel'] == true || json_data['parallel'] == 'true' || json_data[:parallel] == true || json_data[:parallel] == 'true'
+      role_distribution = json_data['role_distribution'] || json_data[:role_distribution] || {}
+    else
+      batch_size = params[:batch_size]&.to_i || 100
+      parallel = params[:parallel] == 'true' || params[:parallel] == true
+      role_distribution = params[:role_distribution] || {}
+    end
 
     # Ensure RBAC rules are set up
     RbacUseCase.setup_rules
@@ -1516,6 +1534,82 @@ class DemoController < ApplicationController
   # NEW: Advanced Operators
   def advanced_operators
     # View for advanced operators demo
+  end
+
+  # DMN Examples Actions
+  def dmn_basic_import
+    @result = nil
+
+    if request.post?
+      context = {
+        credit_score: params[:credit_score]&.to_i || 720,
+        income: params[:income]&.to_i || 65000
+      }
+
+      @result = DmnBasicImportUseCase.evaluate(context)
+    end
+  end
+
+  def dmn_hit_policies
+    @result = nil
+    @policy = params[:policy] || 'unique'
+
+    if request.post?
+      policy = params[:policy]&.to_sym || :unique
+      context = case policy
+                when :unique
+                  { income: params[:income]&.to_i || 50000 }
+                when :priority
+                  {
+                    customer_tier: params[:customer_tier] || 'gold',
+                    purchase_amount: params[:purchase_amount]&.to_i || 600
+                  }
+                when :any
+                  {
+                    age: params[:age]&.to_i || 25,
+                    email_valid: params[:email_valid] == 'true' || params[:email_valid] == '1',
+                    phone_valid: params[:phone_valid] == 'true' || params[:phone_valid] == '1'
+                  }
+                when :collect
+                  {
+                    budget: params[:budget]&.to_i || 600,
+                    category: params[:category] || 'electronics'
+                  }
+                end
+
+      @result = DmnHitPoliciesUseCase.evaluate(policy, context)
+    end
+  end
+
+  def dmn_combining_evaluators
+    @result = nil
+
+    if request.post?
+      context = {
+        credit_score: params[:credit_score]&.to_i || 680,
+        customer_tier: params[:customer_tier] || '',
+        fraud_alert: params[:fraud_alert] == 'true' || params[:fraud_alert] == '1',
+        customer_age_days: params[:customer_age_days]&.to_i || 0,
+        promotional_code: params[:promotional_code] || ''
+      }
+
+      @result = DmnCombiningEvaluatorsUseCase.evaluate(context)
+    end
+  end
+
+  def dmn_real_world_pricing
+    @result = nil
+
+    if request.post?
+      context = {
+        customer_segment: params[:customer_segment] || 'standard',
+        product_category: params[:product_category] || 'electronics',
+        quantity: params[:quantity]&.to_i || 1,
+        promo_code: params[:promo_code] || ''
+      }
+
+      @result = DmnRealWorldPricingUseCase.evaluate(context)
+    end
   end
 
   def test_advanced_operator
