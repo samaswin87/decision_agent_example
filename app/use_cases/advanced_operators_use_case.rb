@@ -5,7 +5,7 @@ class AdvancedOperatorsUseCase
   class << self
     def setup_rules
       # Rule 1: Email Domain Validation (String Operators)
-      DecisionService.instance.save_rule_version(
+      version = DecisionService.instance.save_rule_version(
         rule_id: 'email_domain_validation',
         content: {
           version: "1.0",

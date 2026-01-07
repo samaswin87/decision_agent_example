@@ -155,4 +155,26 @@ Rails.application.routes.draw do
   post "demo/default_adapter", to: "demo#default_adapter"
   get "demo/custom_adapter", to: "demo#custom_adapter"
   post "demo/custom_adapter", to: "demo#custom_adapter"
+
+  # NEW: Context Advanced Examples
+  get "demo/context_advanced", to: "demo#context_advanced"
+  post "demo/context_advanced", to: "demo#context_advanced"
+  post "demo/context_transform", to: "demo#context_transform"
+  post "demo/context_validate", to: "demo#context_validate"
+  post "demo/context_chain", to: "demo#context_chain"
+  post "demo/context_filter", to: "demo#context_filter"
+
+  # NEW: Custom Evaluator Examples
+  get "demo/custom_evaluator", to: "demo#custom_evaluator"
+  post "demo/custom_evaluator", to: "demo#custom_evaluator"
+  post "demo/evaluate_risk", to: "demo#evaluate_risk"
+  post "demo/evaluate_fraud", to: "demo#evaluate_fraud"
+  post "demo/evaluate_eligibility", to: "demo#evaluate_eligibility"
+  post "demo/evaluate_multi_evaluator", to: "demo#evaluate_multi_evaluator"
+
+  # NEW: Workflow Orchestration Examples
+  get "demo/workflow_orchestration", to: "demo#workflow_orchestration"
+  post "demo/workflow_orchestration", to: "demo#workflow_orchestration"
+  post "demo/execute_workflow", to: "demo#execute_workflow"
+  post "demo/execute_workflow_early_exit", to: "demo#execute_workflow_early_exit"
 end

@@ -78,6 +78,21 @@ puts "\n1️⃣3️⃣  Setting up Custom Adapter..."
 CustomAdapterUseCase.setup_rules
 puts "   ✅ Custom Adapter rules created"
 
+# 14. Context Advanced Use Case
+puts "\n1️⃣4️⃣  Setting up Context Advanced..."
+ContextAdvancedUseCase.setup_rules
+puts "   ✅ Context Advanced rules created"
+
+# 15. Custom Evaluator Use Case
+puts "\n1️⃣5️⃣  Setting up Custom Evaluator..."
+# Custom evaluators don't need rule setup, they're Ruby classes
+puts "   ✅ Custom Evaluator use case ready (no rules needed)"
+
+# 16. Workflow Orchestration Use Case
+puts "\n1️⃣6️⃣  Setting up Workflow Orchestration..."
+WorkflowOrchestrationUseCase.setup_rules
+puts "   ✅ Workflow Orchestration rules created"
+
 # Summary
 puts "\n" + "="*80
 puts "SUMMARY"

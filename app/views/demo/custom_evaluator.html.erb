@@ -1,0 +1,152 @@
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #2c3e50; margin-bottom: 30px;">⚙️ Custom Evaluator Use Case</h1>
+  <p style="margin-bottom: 30px; color: #555;">
+    Demonstrates creating and using custom evaluators by extending <code>DecisionAgent::Evaluators::Base</code>.
+    Shows risk assessment, fraud detection, eligibility scoring, and multi-evaluator scenarios.
+  </p>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #e74c3c; margin-bottom: 20px;">Risk Assessment Evaluator</h2>
+    <p style="margin-bottom: 15px;">Custom evaluator that calculates risk scores based on multiple factors.</p>
+    <textarea id="risk-context" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "age": 35,
+  "credit_score": 720,
+  "employment_status": "employed",
+  "employment_years": 5,
+  "debt_to_income_ratio": 0.25
+}</textarea>
+    <button onclick="evaluateRisk()" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Evaluate Risk</button>
+    <div id="risk-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #3498db; margin-bottom: 20px;">Fraud Detection Evaluator</h2>
+    <p style="margin-bottom: 15px;">Custom evaluator that detects fraud based on multiple indicators.</p>
+    <textarea id="fraud-context" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "device_mismatch": true,
+  "location_mismatch": false,
+  "unusual_transaction_pattern": true,
+  "velocity_check_failed": false,
+  "ip_reputation_score": 45,
+  "transaction_amount": 5000
+}</textarea>
+    <button onclick="evaluateFraud()" style="background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Evaluate Fraud</button>
+    <div id="fraud-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #9b59b6; margin-bottom: 20px;">Eligibility Scoring Evaluator</h2>
+    <p style="margin-bottom: 15px;">Custom evaluator that calculates eligibility scores.</p>
+    <textarea id="eligibility-context" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "age": 30,
+  "income": 50000,
+  "credit_score": 680,
+  "employment_status": "employed",
+  "employment_years": 3
+}</textarea>
+    <button onclick="evaluateEligibility()" style="background: #9b59b6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Evaluate Eligibility</button>
+    <div id="eligibility-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #f39c12; margin-bottom: 20px;">Multi-Evaluator</h2>
+    <p style="margin-bottom: 15px;">Combine multiple custom evaluators for comprehensive decision making.</p>
+    <textarea id="multi-context" rows="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "age": 28,
+  "credit_score": 750,
+  "employment_status": "employed",
+  "employment_years": 4,
+  "debt_to_income_ratio": 0.20,
+  "device_mismatch": false,
+  "location_mismatch": false,
+  "income": 60000
+}</textarea>
+    <button onclick="evaluateMulti()" style="background: #f39c12; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Evaluate with Multiple Evaluators</button>
+    <div id="multi-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 8px;">
+    <h3 style="color: #2c3e50; margin-bottom: 15px;">📚 Custom Evaluator Benefits</h3>
+    <ul style="color: #555; line-height: 1.8;">
+      <li><strong>Flexibility:</strong> Implement domain-specific logic not expressible in JSON rules</li>
+      <li><strong>Performance:</strong> Optimize complex calculations in Ruby</li>
+      <li><strong>Integration:</strong> Connect with external services or databases</li>
+      <li><strong>Composability:</strong> Combine multiple evaluators for complex decisions</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function evaluateRisk() {
+  const context = JSON.parse(document.getElementById('risk-context').value);
+  fetch('/demo/evaluate_risk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('risk-result').style.display = 'block';
+    document.getElementById('risk-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('risk-result').style.display = 'block';
+    document.getElementById('risk-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function evaluateFraud() {
+  const context = JSON.parse(document.getElementById('fraud-context').value);
+  fetch('/demo/evaluate_fraud', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('fraud-result').style.display = 'block';
+    document.getElementById('fraud-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('fraud-result').style.display = 'block';
+    document.getElementById('fraud-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function evaluateEligibility() {
+  const context = JSON.parse(document.getElementById('eligibility-context').value);
+  fetch('/demo/evaluate_eligibility', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('eligibility-result').style.display = 'block';
+    document.getElementById('eligibility-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('eligibility-result').style.display = 'block';
+    document.getElementById('eligibility-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function evaluateMulti() {
+  const context = JSON.parse(document.getElementById('multi-context').value);
+  fetch('/demo/evaluate_multi_evaluator', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('multi-result').style.display = 'block';
+    document.getElementById('multi-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('multi-result').style.display = 'block';
+    document.getElementById('multi-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+</script>
+

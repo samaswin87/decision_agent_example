@@ -1,0 +1,98 @@
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #2c3e50; margin-bottom: 30px;">🔄 Workflow Orchestration Use Case</h1>
+  <p style="margin-bottom: 30px; color: #555;">
+    Demonstrates complex multi-stage decision workflows using DecisionAgent. Shows how to chain decisions,
+    handle workflow state, and implement early exit conditions.
+  </p>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #3498db; margin-bottom: 20px;">Full Workflow Execution</h2>
+    <p style="margin-bottom: 15px;">Execute a complete multi-stage workflow with all stages.</p>
+    <textarea id="workflow-context" rows="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "age": 35,
+  "has_valid_id": true,
+  "credit_score": 720,
+  "credit_history_years": 7,
+  "annual_income": 65000,
+  "employment_status": "employed",
+  "employment_years": 5,
+  "debt_to_income": 0.30
+}</textarea>
+    <button onclick="executeWorkflow()" style="background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Execute Full Workflow</button>
+    <div id="workflow-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #e74c3c; margin-bottom: 20px;">Workflow with Early Exit</h2>
+    <p style="margin-bottom: 15px;">Execute workflow with early exit conditions and fast-track options.</p>
+    <textarea id="early-exit-context" rows="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "age": 32,
+  "has_valid_id": true,
+  "credit_score": 780,
+  "credit_history_years": 10,
+  "annual_income": 80000,
+  "employment_status": "employed",
+  "employment_years": 8,
+  "debt_to_income": 0.25
+}</textarea>
+    <button onclick="executeEarlyExit()" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Execute with Early Exit</button>
+    <div id="early-exit-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 8px;">
+    <h3 style="color: #2c3e50; margin-bottom: 15px;">📚 Workflow Stages</h3>
+    <ol style="color: #555; line-height: 1.8;">
+      <li><strong>Initial Screening:</strong> Basic requirements check (age, valid ID)</li>
+      <li><strong>Credit Check:</strong> Credit score and history evaluation</li>
+      <li><strong>Income Verification:</strong> Income and employment verification</li>
+      <li><strong>Final Approval:</strong> Final decision based on all stages</li>
+    </ol>
+    <h4 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Features:</h4>
+    <ul style="color: #555; line-height: 1.8;">
+      <li>Stage-by-stage progression with state management</li>
+      <li>Early exit on rejection at any stage</li>
+      <li>Fast-track option for high-quality applicants</li>
+      <li>Context enrichment between stages</li>
+      <li>Complete workflow history tracking</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function executeWorkflow() {
+  const context = JSON.parse(document.getElementById('workflow-context').value);
+  fetch('/demo/execute_workflow', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('workflow-result').style.display = 'block';
+    document.getElementById('workflow-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('workflow-result').style.display = 'block';
+    document.getElementById('workflow-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function executeEarlyExit() {
+  const context = JSON.parse(document.getElementById('early-exit-context').value);
+  fetch('/demo/execute_workflow_early_exit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('early-exit-result').style.display = 'block';
+    document.getElementById('early-exit-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('early-exit-result').style.display = 'block';
+    document.getElementById('early-exit-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+</script>
+

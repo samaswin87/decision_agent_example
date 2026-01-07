@@ -1,0 +1,148 @@
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #2c3e50; margin-bottom: 30px;">🔧 Context Advanced Use Case</h1>
+  <p style="margin-bottom: 30px; color: #555;">
+    Demonstrates advanced usage of <code>DecisionAgent::Context</code> class including context transformation, 
+    validation, enrichment, chaining, and filtering.
+  </p>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #3498db; margin-bottom: 20px;">Context Transformation</h2>
+    <p style="margin-bottom: 15px;">Transform and enrich context with computed fields before evaluation.</p>
+    <textarea id="transform-context" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "user_id": "user123",
+  "signup_date": "2023-01-15T00:00:00Z",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@example.com"
+}</textarea>
+    <button onclick="transformContext()" style="background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Transform Context</button>
+    <div id="transform-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #e74c3c; margin-bottom: 20px;">Context Validation</h2>
+    <p style="margin-bottom: 15px;">Validate context has all required fields before evaluation.</p>
+    <textarea id="validate-context" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "email": "user@example.com",
+  "phone": "+1234567890",
+  "address": "123 Main St"
+}</textarea>
+    <button onclick="validateContext()" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Validate Context</button>
+    <div id="validate-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #9b59b6; margin-bottom: 20px;">Context Chaining</h2>
+    <p style="margin-bottom: 15px;">Chain multiple context transformations in sequence.</p>
+    <textarea id="chain-context" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "login_count": 50,
+  "interaction_count": 25,
+  "failed_logins": 2
+}</textarea>
+    <button onclick="chainContext()" style="background: #9b59b6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Chain Transformations</button>
+    <div id="chain-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div class="card" style="background: white; border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #f39c12; margin-bottom: 20px;">Context Filtering</h2>
+    <p style="margin-bottom: 15px;">Filter context to only include allowed keys.</p>
+    <textarea id="filter-context" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 15px;">{
+  "user_id": "user456",
+  "email": "user@example.com",
+  "age": 30,
+  "internal_note": "Do not expose",
+  "sensitive_data": "hidden"
+}</textarea>
+    <input type="text" id="filter-keys" placeholder='["user_id", "email", "age"]' style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; font-family: monospace;">
+    <button onclick="filterContext()" style="background: #f39c12; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Filter Context</button>
+    <div id="filter-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 8px;">
+    <h3 style="color: #2c3e50; margin-bottom: 15px;">📚 Use Cases</h3>
+    <ul style="color: #555; line-height: 1.8;">
+      <li><strong>Data Enrichment:</strong> Add computed fields before evaluation</li>
+      <li><strong>Security:</strong> Filter sensitive data from context</li>
+      <li><strong>Validation:</strong> Ensure required fields are present</li>
+      <li><strong>Transformation:</strong> Chain multiple transformations for complex workflows</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function transformContext() {
+  const context = JSON.parse(document.getElementById('transform-context').value);
+  fetch('/demo/context_transform', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('transform-result').style.display = 'block';
+    document.getElementById('transform-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('transform-result').style.display = 'block';
+    document.getElementById('transform-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function validateContext() {
+  const context = JSON.parse(document.getElementById('validate-context').value);
+  fetch('/demo/context_validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('validate-result').style.display = 'block';
+    document.getElementById('validate-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('validate-result').style.display = 'block';
+    document.getElementById('validate-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function chainContext() {
+  const context = JSON.parse(document.getElementById('chain-context').value);
+  fetch('/demo/context_chain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('chain-result').style.display = 'block';
+    document.getElementById('chain-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('chain-result').style.display = 'block';
+    document.getElementById('chain-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+
+function filterContext() {
+  const context = JSON.parse(document.getElementById('filter-context').value);
+  const allowedKeys = JSON.parse(document.getElementById('filter-keys').value || '[]');
+  fetch('/demo/context_filter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ context: context, allowed_keys: allowedKeys })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('filter-result').style.display = 'block';
+    document.getElementById('filter-result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+  })
+  .catch(e => {
+    document.getElementById('filter-result').style.display = 'block';
+    document.getElementById('filter-result').innerHTML = '<p style="color: red;">Error: ' + e.message + '</p>';
+  });
+}
+</script>
+

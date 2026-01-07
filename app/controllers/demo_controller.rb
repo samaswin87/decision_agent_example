@@ -1171,7 +1171,10 @@ class DemoController < ApplicationController
       { id: 'pundit_adapter', name: 'Pundit Adapter', description: 'Integration with Pundit authorization library' },
       { id: 'devise_cancancan_adapter', name: 'Devise + CanCanCan Adapter', description: 'Integration with Devise authentication and CanCanCan authorization' },
       { id: 'default_adapter', name: 'Default Adapter', description: 'Default DecisionAgent RBAC adapter' },
-      { id: 'custom_adapter', name: 'Custom Adapter', description: 'Custom adapter implementation example' }
+      { id: 'custom_adapter', name: 'Custom Adapter', description: 'Custom adapter implementation example' },
+      { id: 'context_advanced', name: 'Context Advanced (NEW)', description: 'Advanced Context class usage with transformation, validation, and enrichment' },
+      { id: 'custom_evaluator', name: 'Custom Evaluator (NEW)', description: 'Creating and using custom evaluators extending DecisionAgent::Evaluators::Base' },
+      { id: 'workflow_orchestration', name: 'Workflow Orchestration (NEW)', description: 'Complex multi-stage decision workflows with state management' }
     ]
   end
 
@@ -1691,6 +1694,142 @@ class DemoController < ApplicationController
         rule_content_type: rule_content.class.name,
         rule_content_keys: rule_content.is_a?(Hash) ? rule_content.keys.first(5) : nil
       }, status: 500
+    end
+  end
+
+  # NEW: Context Advanced Examples
+  def context_advanced
+    @result = nil
+  end
+
+  def context_transform
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = ContextAdvancedUseCase.transform_context(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def context_validate
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = ContextAdvancedUseCase.validate_context(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def context_chain
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = ContextAdvancedUseCase.chain_context_transformations(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def context_filter
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      allowed_keys = JSON.parse(params[:allowed_keys] || '[]', symbolize_names: true)
+      result = ContextAdvancedUseCase.filter_context(context, allowed_keys)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  # NEW: Custom Evaluator Examples
+  def custom_evaluator
+    @result = nil
+  end
+
+  def evaluate_risk
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = CustomEvaluatorUseCase.evaluate_risk(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def evaluate_fraud
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = CustomEvaluatorUseCase.evaluate_fraud(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def evaluate_eligibility
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = CustomEvaluatorUseCase.evaluate_eligibility(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def evaluate_multi_evaluator
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = CustomEvaluatorUseCase.evaluate_multi_evaluator(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  # NEW: Workflow Orchestration Examples
+  def workflow_orchestration
+    @result = nil
+  end
+
+  def execute_workflow
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = WorkflowOrchestrationUseCase.execute_workflow(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
+    end
+  end
+
+  def execute_workflow_early_exit
+    begin
+      context = JSON.parse(params[:context] || '{}', symbolize_names: true)
+      result = WorkflowOrchestrationUseCase.execute_workflow_with_early_exit(context)
+      render json: result
+    rescue JSON::ParserError => e
+      render json: { error: "Invalid JSON: #{e.message}" }, status: 400
+    rescue => e
+      render json: { error: e.message }, status: 500
     end
   end
 end
